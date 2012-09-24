@@ -14,14 +14,25 @@ module FCKEditor
 
   def enter_source_text(editor, text)
     source(editor)
-    editor.text_field(:class=>"SourceField").wait_until_present
-    editor.text_field(:class=>"SourceField").set text
+    source_field(editor).wait_until_present
+    source_field(editor).set text
   end
 
   def get_source_text(editor)
     source(editor)
-    editor.text_field(:class=>"SourceField").wait_until_present
-    editor.text_field(:class=>"SourceField").value
+    source_field(editor).wait_until_present
+    source_field(editor).value
+  end
+
+  def entity_picker(editor)
+    editor.div(:title=>"Sakai_Entity_Link").wait_until_present
+    editor.div(:title=>"Sakai_Entity_Link").click
+    @browser.frame(:index=>2).frame(:id=>"frmMain").button(:value=>"Browse Server").click
+    @browser.window(:url=>/sakai-entitybrowser-tool/).use
+  end
+
+  def source_field(editor)
+    editor.text_field(:class=>"SourceField")
   end
 
 end

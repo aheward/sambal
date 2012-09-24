@@ -129,7 +129,6 @@ class TestImportSite < Test::Unit::TestCase
     puts "New Assignment instructions:\n\n"
     puts @new_assignment.instructions
 
-
   end
   
 end
