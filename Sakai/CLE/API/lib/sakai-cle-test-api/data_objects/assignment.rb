@@ -5,7 +5,11 @@ class AssignmentObject
   include Workflows
 
   attr_accessor :title, :site, :instructions, :id, :link, :status, :grade_scale,
-                :max_points, :allow_resubmission, :num_resubmissions
+                :max_points, :allow_resubmission, :num_resubmissions,
+                # Note the following variables are taken from the Entity picker's
+                # Item Info list
+                :retract_time, :time_due, :time_modified, :url, :portal_url,
+                :description, :time_created, :direct_url
 
   def initialize(browser, opts={})
     @browser = browser
@@ -79,7 +83,7 @@ class AssignmentObject
     end
   end
 
-  def get_assignment_info
+  def get_info
     open_my_site_by_name @site unless @browser.title=~/#{@site}/
     assignments unless @browser.title=~/Assignments$/
     on AssignmentsList do |list|
@@ -92,10 +96,32 @@ class AssignmentObject
         list.edit_assignment @title
       end
     end
+
+    # TODO: Need to add more stuff here as needed...
+
     on AssignmentAdd do |edit|
-      # TODO: Need to add more stuff here as needed...
+
       @instructions=edit.get_source_text edit.editor
+      edit.source edit.editor
+      edit.entity_picker(edit.editor)
+    end
+    on EntityPicker do |info|
+      info.view_assignment_details @title
+      @retract_time=info.retract_time
+      @time_due=info.time_due
+      @time_modified=info.time_modified
+      @url=info.url
+      @portal_url=info.portal_url
+      @description=info.description
+      @time_created=info.time_created
+      @direct_url=info.direct_link
+      info.close_picker
+    end
+    on AssignmentAdd do |edit|
+      edit.cancel
     end
   end
+
+
 
 end

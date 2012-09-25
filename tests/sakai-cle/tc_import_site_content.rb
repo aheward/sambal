@@ -19,7 +19,7 @@ class TestImportSite < Test::Unit::TestCase
     @instructor = "admin"
     @ipassword = "admin"
     @file_path = @config['data_directory']
-    @source_site_string = "Links to various items in this site:\n"
+    @source_site_string = "Links to various items in this site:"
 
   end
 =begin
@@ -36,12 +36,17 @@ class TestImportSite < Test::Unit::TestCase
     @site1 = make SiteObject, :description=>"Original Site"
     @site1.create
 
-    @source_site_string << "Source Site ID: #{@site1.id}<br />"
+    @source_site_string << "<br /><br />Source Site ID: #{@site1.id}<br /><br />"
 
     @assignment = make AssignmentObject, :site=>@site1.name, :instructions=>@source_site_string
     @assignment.create
+    @assignment.get_info
 
-    @source_site_string << "<br />Assignment ID: #{@assignment.id}<br />Assignment link: <a href=\"#{@assignment.link}\">#{@assignment.title}</a><br />"
+    @source_site_string << "Assignment...<br />ID: #{@assignment.id}<br />"
+    @source_site_string << "Link (made 'by hand'): <a href=\"#{@assignment.link}\">#{@assignment.title}</a><br />"
+    @source_site_string << "URL from Entity picker: <a href=\"#{@assignment.url}\">#{@assignment.title}</a><br />"
+    @source_site_string << "<em>Direct</em> URL from Entity picker: <a href=\"#{@assignment.direct_url}\">#{@assignment.title}</a><br /><br />#{@assignment.direct_url}<br /><br />"
+    @source_site_string << "<em>Portal</em> URL from Entity picker: <a href=\"#{@assignment.portal_url}\">#{@assignment.title}</a><br /><br />#{@assignment.portal_url}<br /><br />"
 =begin
     @announcement = make AnnouncementObject, :site=>@site1.name, :body=>@assignment.link
     @announcement.create
@@ -118,7 +123,7 @@ class TestImportSite < Test::Unit::TestCase
     @site2.create_and_reuse_site @site1.name
 
     @new_assignment = make AssignmentObject, :site=>@site2.name, @status=>"Draft", :title=>@assignment.title
-    @new_assignment.get_assignment_info
+    @new_assignment.get_info
 
     puts "Original Assignment ID: #{@assignment.id}\n\n"
     puts "Original Assignment instructions:\n\n"
