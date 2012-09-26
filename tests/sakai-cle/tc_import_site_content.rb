@@ -51,17 +51,17 @@ class TestImportSite < Test::Unit::TestCase
     @announcement = make AnnouncementObject, :site=>@site1.name, :body=>@assignment.link
     @announcement.create
 
-    @source_site_string << "<br />\nAnnouncement link: <a href=\"#{@announcement.link}\">#{@announcement.title}</a><br />"
+    @source_site_string << "<br />\nAnnouncement link: <a href=\"#{@announcement.link}\">#{@announcement.title}</a><br />\n"
 
     @file = make FileObject, :site=>@site1.name, :name=>"flower02.jpg", :source_path=>@file_path+"images/"
     @file.create
 
-    @source_site_string << "<br />Uploaded file: <a href=\"#{@file.href}\">#{@file.name}</a><br />"
+    @source_site_string << "<br />\nUploaded file: <a href=\"#{@file.href}\">#{@file.name}</a><br />\n"
 
     @htmlpage = make HTMLPageObject, :site=>@site1.name, :folder=>"#{@site1.name} Resources", :html=>@source_site_string
     @htmlpage.create
 
-    @source_site_string << "<br />HTML Page: <a href=\"#{@htmlpage.url}\">#{@htmlpage.name}</a><br />"
+    @source_site_string << "<br />\nHTML Page: <a href=\"#{@htmlpage.url}\">#{@htmlpage.name}</a><br />\n"
 
     @folder = make FolderObject, :site=>@site1.name, :parent_folder=>"#{@site1.name} Resources"
     @folder.create
@@ -69,7 +69,7 @@ class TestImportSite < Test::Unit::TestCase
     @nestedhtmlpage = make HTMLPageObject, :site=>@site1.name, :folder=>@folder.name, :html=>@source_site_string
     @nestedhtmlpage.create
 
-    @source_site_string << "<br />Nested HTML Page: <a href=\"#{@nestedhtmlpage.url}\">#{@nestedhtmlpage.name}</a><br />"
+    @source_site_string << "<br />\nNested HTML Page: <a href=\"#{@nestedhtmlpage.url}\">#{@nestedhtmlpage.name}</a><br />\n"
 
     @web_content1 = make WebContentObject, :title=>@htmlpage.name, :source=>@htmlpage.url, :site=>@htmlpage.site
     @web_content1.create
@@ -80,13 +80,13 @@ class TestImportSite < Test::Unit::TestCase
     @module = make ModuleObject, :site=>@site1.name
     @module.create
 
-    @source_site_string << "<br />Module: <a href=\"#{@module.href}\">#{@module.name}</a><br />"
+    @source_site_string << "<br />\nModule: <a href=\"#{@module.href}\">#{@module.name}</a><br />\n"
 
     @section1 = make ContentSectionObject, :site=>@site1.name, :module=>@module.title, :content_type=>"Compose content with editor",
                      :editor_content=>@source_site_string
     @section1.create
 
-    @source_site_string << "<br />Section 1: <a href=\"#{@section1.href}\">#{@section1.name}</a><br />"
+    @source_site_string << "<br />\nSection 1: <a href=\"#{@section1.href}\">#{@section1.name}</a><br />\n"
 
     @section2 = make ContentSectionObject, :site=>@site1.name, :module=>@module.title, :content_type=>"Upload or link to a file",
                      :file_name=>"flower01.jpg", :file_path=>@file_path+"images/"
@@ -110,8 +110,6 @@ class TestImportSite < Test::Unit::TestCase
     @syllabus = make SyllabusObject, @content=>@source_site_string, :site=>@site1.name
     @syllabus.create
 
-    @source_site_string << "<br />Syllabus: "
-
     @assignment.edit :instructions=>@source_site_string
 
     @announcement.edit :body=>@source_site_string
@@ -133,21 +131,21 @@ class TestImportSite < Test::Unit::TestCase
 
     def check_this_stuff(thing)
       puts "Site ID Updated? " + (thing[/Site ID: #{@site2.id}/]==nil ? "no" : "yes")
-      puts "Assignment ID updated? " + (thing[/ID:\(n\) #{@new_assignment.id}/]==nil ? "no" : "yes")
-      puts "Old Assignment ID still there? "  + (thing[/ID:\(n\) #{@assignment.id}/]==nil ? "no" : "yes")
-      puts "Assignment Link updated? " + (thing[/hand.\): <a href.+#{@new_assignment.link}.+doView_assignment/]==nil ? "no" : "yes")
-      puts "Entity picker Assignment URL updated? " + (thing[/\(x\) <a href.+#{@new_assignment.url}.+doView_submission/]==nil ? "no" : "yes")
       puts "Assignment Direct link updated? " + (thing[/\(y\) <a href..#{@new_assignment.direct_url}/]==nil ? "no" : "yes")
-      puts "Assignment Portal Link updated? " + (thing[/\(z\) <a href..#{@new_assignment.portal_url}/]==nil ? "no" : "yes")
-      puts "Announcement Link updated? " + (thing[/#{@announcement.id}/]==nil ? "yes" : "no")
+      puts "Announcement Link updated? " + (thing[/Announcement link:.+#{@announcement.id}.+#{@announcement.title}/]==nil ? "yes" : "no")
       puts "File Link updated? " + (thing[/Uploaded file:.+#{@site2.id}.+#{@file.name}/]==nil ? "no" : "yes")
       puts "HTML Page Link updated? " + (thing[/#{@site2.id}\/#{@htmlpage.name}/]==nil ? "no" : "yes")
       puts "Nested HTML Page Link updated? " + (thing[/#{@site2.id}\/#{@folder.name}\/#{@nestedhtmlpage.name}/]==nil ? "no" : "yes")
-      puts "Module Link updated? " + (thing[/Module:.+#{@site2.id}.+#{@module.name}/]==nil ? "no" : "yes")
-      puts "Section 1 Link updated? " + (thing[/Section 1:.+#{@site2.id}.+#{@section1.name}/]==nil ? "no" : "yes")
-      puts "Section 2 Link updated? " + (thing[/Section 2:.+#{@site2.id}.+#{@section2.name}/]==nil ? "no" : "yes")
-      puts "Section 3 Link updated? " + (thing[/Section 3:.+#{@site2.id}.+#{@section3.name}/]==nil ? "no" : "yes")
-      puts "Section 4 Link updated? " + (thing[/Section 4:.+#{@site2.id}.+#{@section4.name}/]==nil ? "no" : "yes")
+      puts "Wiki link updated? " + (thing[/Wiki:.+#{@site2.id}.+#{@wiki.name}/]==nil ? "no" : "yes" )
+
+      # These are not expected to work:
+      #puts "Assignment ID updated? " + (thing[/ID:\(n\) #{@new_assignment.id}/]==nil ? "no" : "yes")
+      #puts "Assignment Link updated? " + (thing[/hand.\): <a href.+#{@new_assignment.link}.+doView_assignment/]==nil ? "no" : "yes")
+      #puts "Entity picker Assignment URL updated? " + (thing[/\(x\) <a href.+#{@new_assignment.url}.+doView_submission/]==nil ? "no" : "yes")
+      #puts "Assignment Portal Link updated? " + (thing[/\(z\) <a href..#{@new_assignment.portal_url}/]==nil ? "no" : "yes")
+      #puts "Module Link updated? " + (thing[/Module:.+#{@site2.id}.+#{@module.name}/]==nil ? "no" : "yes")
+      #puts "Section 1 Link updated? " + (thing[/Section 1:.+#{@site2.id}.+#{@section1.name}/]==nil ? "no" : "yes")
+      #puts "Section 2 Link updated? " + (thing[/Section 2:.+#{@site2.id}.+#{@section2.name}/]==nil ? "no" : "yes")
       #puts "Wiki link updated? " + (thing[/#{@site2.id}/]==nil ? "no" : "yes")
       #puts "Syllabus Link updated? " + (thing[/Syllabus: #{@site2.id}/]==nil ? "no" : "yes")
     end

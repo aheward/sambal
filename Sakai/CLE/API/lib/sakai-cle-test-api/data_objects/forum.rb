@@ -5,7 +5,7 @@ class ForumObject
   include Utilities
   include Workflows
   
-  attr_accessor :site, :title, :short_description, :description
+  attr_accessor :site, :title, :short_description, :description, :direct_link
   
   def initialize(browser, opts={})
     @browser = browser
@@ -23,7 +23,17 @@ class ForumObject
   end
     
   def create
-    
+    open_my_site_by_name @site unless @browser.title=~/#{@site}/
+    forums unless @browser.title=~/Forums$/
+    on Forums do |forums|
+      forums.new_forum
+    end
+    on EditForum do |edit|
+      edit.title.set @title
+      edit.short_description.set @short_description unless @short_description==nil
+      edit.enter_source_text(edit.editor, @description) unless @description==nil
+      edit.save
+    end
   end
     
   def edit opts={}
@@ -37,5 +47,9 @@ class ForumObject
   def delete
     
   end
-  
+
+  def get_direct_link
+
+  end
+
 end

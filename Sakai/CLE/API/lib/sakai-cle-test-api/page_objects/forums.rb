@@ -9,30 +9,21 @@ class Forums < BasePage
     frm.table(:id=>"msgForum:forums").row(:text=>/#{Regexp.escape(title)}/).span(:text=>"DRAFT").exist?
   end
 
-  def new_forum
-    frm.link(:text=>"New Forum").click
-    EditForum.new(@browser)
-  end
+  action(:new_forum) { |b| b.frm.link(:text=>"New Forum").click }
 
+  # AddEditTopic
   def new_topic_for_forum(name)
     index = forum_titles.index(name)
     frm.link(:text=>"New Topic", :index=>index).click
-    AddEditTopic.new(@browser)
   end
 
-  def organize
-    frm.link(:text=>"Organize").click
-    OrganizeForums.new(@browser)
-  end
+  # OrganizeForums
+  action(:organize) { |b| b.frm.link(:text=>"Organize").click }
 
-  def template_settings
-    frm.link(:text=>"Template Settings").click
-    ForumTemplateSettings.new(@browser)
-  end
+  # ForumTemplateSettings
+  action(:template_settings) { |b| b.frm.link(:text=>"Template Settings").click }
 
-  def forums_table
-    frm.div(:class=>"portletBody").table(:id=>"msgForum:forums")
-  end
+  element(:forums_table) { |b| b.frm.div(:class=>"portletBody").table(:id=>"msgForum:forums") }
 
   def forum_titles
     titles = []
@@ -48,38 +39,37 @@ class Forums < BasePage
     return titles
   end
 
+  # EditForum
   def forum_settings(name)
     index = forum_titles.index(name)
     frm.link(:text=>"Forum Settings", :index=>index).click
-    EditForum.new(@browser)
   end
 
+  # AddEditTopic
   def topic_settings(name)
     index = topic_titles.index(name)
     frm.link(:text=>"Topic Settings", :index=>index).click
-    AddEditTopic.new(@browser)
   end
 
+  # EditForum
   def delete_forum(name)
     index = forum_titles.index(name)
     frm.link(:id=>/msgForum:forums:\d+:delete/,:text=>"Delete", :index=>index).click
-    EditForum.new(@browser)
   end
 
+  # AddEditTopic
   def delete_topic(name)
     index = topic_titles.index(name)
     frm.link(:id=>/topics:\d+:delete_confirm/, :text=>"Delete", :index=>index).click
-    AddEditTopic.new(@browser)
   end
 
   def open_forum(forum_title)
     frm.link(:text=>forum_title).click
-    # New Class def goes here.
   end
 
+  # TopicPage
   def open_topic(topic_title)
     frm.link(:text=>topic_title).click
-    TopicPage.new(@browser)
   end
 end
 
@@ -87,10 +77,8 @@ class TopicPage < BasePage
 
   frame_element
 
-  def post_new_thread
-    frm.link(:text=>"Post New Thread").click
-    ComposeForumMessage.new(@browser)
-  end
+  # ComposeForumMessage
+  action(:post_new_thread) { |b| b.frm.link(:text=>"Post New Thread").click }
 
   def thread_titles
     titles = []
@@ -101,29 +89,27 @@ class TopicPage < BasePage
     return titles
   end
 
+  # ViewForumThread
   def open_message(message_title)
     frm.div(:class=>"portletBody").link(:text=>message_title).click
-    ViewForumThread.new(@browser)
   end
 
-  def display_entire_message
-    frm.link(:text=>"Display Entire Message").click
-    TopicPage.new(@browser)
-  end
+  # TopicPage
+  action(:display_entire_message){ |b| b.frm.link(:text=>"Display Entire Message").click }
+
 end
 
 class ViewForumThread < BasePage
 
   frame_element
 
-  def reply_to_thread
-    frm.link(:text=>"Reply to Thread").click
-    ComposeForumMessage.new(@browser)
-  end
+  # ComposeForumMessage
+  action(:reply_to_thread) { |b| b.frm.link(:text=>"Reply to Thread").click }
 
+  # ComposeForumMessage
+  # TODO: Figure out a better way to do this...
   def reply_to_message(index)
     frm.link(:text=>"Reply", :index=>(index.to_i - 1)).click
-    ComposeForumMessage.new(@browser)
   end
 end
 
@@ -134,35 +120,18 @@ class ComposeForumMessage < BasePage
 
   expected_element :editor
 
-  def post_message
-    frm.button(:text=>"Post Message").click
-    # Not sure if we need logic here...
-    TopicPage.new(@browser)
-  end
+  # TopicPage, probably
+  action(:post_message) { |b| b.frm.button(:text=>"Post Message").click }
 
-  element(:editor) { |b| b.frm.frame(:id, "dfCompose:df_compose_body_inputRichText___Frame").td(:id, "xEditingArea").frame(:index=>0) }
+  element(:editor) { |b| b.frm.frame(:id, "dfCompose:df_compose_body_inputRichText___Frame") }
 
   def message=(text)
-    editor.send_keys(text)
+    editor.td(:id, "xEditingArea").frame(:index=>0).send_keys(text)
   end
 
-  def reply_text
-    @browser.frame(:index=>1).div(:class=>"singleMessageReply").text
-  end
+  value(:reply_text) { |b| b.frame(:index=>1).div(:class=>"singleMessageReply").text }
 
-  def add_attachments
-    #FIXME
-  end
-
-  def cancel
-    frm.button(:value=>"Cancel").click
-    # Logic for picking the correct page class
-    if frm.link(:text=>"Reply to Thread")
-      ViewForumThread.new(@browser)
-    elsif frm.link(:text=>"Post New Thread").click
-      TopicPage.new(@browser)
-    end
-  end
+  action(:cancel) { |b| b.frm.button(:value=>"Cancel").click }
 
   element(:title) { |b| b.frm.text_field(:id=>"dfCompose:df_compose_title") }
 
@@ -174,15 +143,11 @@ class ForumTemplateSettings < BasePage
 
   value(:page_title) { |b| b.frm.div(:class=>"portletBody").h3(:index=>0).text }
 
-  def save
-    frm.button(:value=>"Save").click
-    Forums.new(@browser)
-  end
+  # Forums
+  action(:save) { |b| b.frm.button(:value=>"Save").click }
 
-  def cancel
-    frm.button(:value=>"Cancel").click
-    Forums.new(@browser)
-  end
+  # Forums
+  action(:cancel) { |b| b.frm.button(:value=>"Cancel").click }
 
 end
 
@@ -190,13 +155,12 @@ class OrganizeForums < BasePage
 
   frame_element
 
-  def save
-    frm.button(:value=>"Save").click
-    Forums.new(@browser)
-  end
+  # Forums
+  action(:save) { |b| b.frm.button(:value=>"Save").click }
 
   # These are set to so that the user
   # does not have to start the list at zero...
+  # TODO: Is there any chance there's a better way to do this? It's friggin' ugly!
   def forum(index)
     frm.select(:id, "revise:forums:#{index.to_i - 1}:forumIndex")
   end
@@ -208,30 +172,23 @@ end
 
 class EditForum < BasePage
 
+  include FCKEditor
   frame_element
 
-  def save
-    frm.button(:value=>"Save").click
-    Forums.new(@browser)
-  end
+  # Forums
+  action(:save) { |b| b.frm.button(:value=>"Save").click }
 
-  def save_and_add
-    frm.button(:value=>"Save Settings & Add Topic").click
-    AddEditTopic.new(@browser)
-  end
+  # AddEditTopic
+  action(:save_and_add) { |b| b.frm.button(:value=>"Save Settings & Add Topic").click }
 
-  def editor
-    frm.div(:class=>"portletBody").frame(:id, "revise:df_compose_description_inputRichText___Frame").td(:id, "xEditingArea").frame(:index=>0)
-  end
+  element(:editor) { |b| b.frm.div(:class=>"portletBody").frame(:id, "revise:df_compose_description_inputRichText___Frame") }
 
   def description=(text)
-    editor.send_keys(text)
+    editor.td(:id, "xEditingArea").frame(:index=>0).send_keys(text)
   end
 
-  def add_attachments
-    frm.button(:value=>/attachments/).click
-    ForumsAddAttachments.new(@browser)
-  end
+  #ForumsAddAttachments (or not, actually, now that I think of it)
+  action(:add_attachments) { |b| b.frm.button(:value=>/attachments/).click }
 
   element(:title){ |b| b.frm.text_field(:id=>"revise:forum_title") }
   element(:short_description){ |b| b.frm.text_field(:id=>"revise:forum_shortDescription") }
@@ -240,27 +197,23 @@ end
 
 class AddEditTopic < BasePage
 
+  include FCKEditor
   frame_element
 
-  @@table_index=0
+  @@table_index=0 # TODO: Seriously think about a better way to do this
 
   def editor
-    frm.div(:class=>"portletBody").frame(:id, "revise:topic_description_inputRichText___Frame").td(:id, "xEditingArea").frame(:index=>0)
+    frm.div(:class=>"portletBody").frame(:id, "revise:topic_description_inputRichText___Frame")
   end
 
   def description=(text)
-    editor.send_keys(text)
+    editor.td(:id, "xEditingArea").frame(:index=>0).send_keys(text)
   end
 
-  def save
-    frm.button(:value=>"Save").click
-    Forums.new(@browser)
-  end
+  # Forums
+  action(:save) { |b| b.frm.button(:value=>"Save").click }
 
-  def add_attachments
-    frm.button(:value=>/Add.+ttachment/).click
-    ForumsAddAttachments.new(@browser)
-  end
+  action(:add_attachments) { |b| b.frm.button(:value=>/Add.+ttachment/).click }
 
   def roles
     roles=[]

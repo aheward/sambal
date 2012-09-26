@@ -28,7 +28,7 @@ module FCKEditor
     editor.div(:title=>"Sakai_Entity_Link").wait_until_present
     editor.div(:title=>"Sakai_Entity_Link").click
     @browser.frame(:index=>2).frame(:id=>"frmMain").button(:value=>"Browse Server").click
-    @browser.window(:url=>/sakai-entitybrowser-tool/).use
+    @browser.window(:url=>/entitybrowser/).use
   end
 
   def source_field(editor)
