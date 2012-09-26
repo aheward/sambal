@@ -36,22 +36,22 @@ class TestImportSite < Test::Unit::TestCase
     @site1 = make SiteObject, :description=>"Original Site"
     @site1.create
 
-    @source_site_string << "<br /><br />Source Site ID: #{@site1.id}<br /><br />"
+    @source_site_string << "<br />\n<br />\nSite ID: #{@site1.id}<br />\n<br />\n"
 
     @assignment = make AssignmentObject, :site=>@site1.name, :instructions=>@source_site_string
     @assignment.create
     @assignment.get_info
 
-    @source_site_string << "Assignment...<br />ID: #{@assignment.id}<br />"
-    @source_site_string << "Link (made 'by hand'): <a href=\"#{@assignment.link}\">#{@assignment.title}</a><br />"
-    @source_site_string << "URL from Entity picker: <a href=\"#{@assignment.url}\">#{@assignment.title}</a><br />"
-    @source_site_string << "<em>Direct</em> URL from Entity picker: <a href=\"#{@assignment.direct_url}\">#{@assignment.title}</a><br /><br />#{@assignment.direct_url}<br /><br />"
-    @source_site_string << "<em>Portal</em> URL from Entity picker: <a href=\"#{@assignment.portal_url}\">#{@assignment.title}</a><br /><br />#{@assignment.portal_url}<br /><br />"
-=begin
+    @source_site_string << "Assignment...<br />\nID:(n) #{@assignment.id}<br />\n"
+    @source_site_string << "Link (made 'by hand'): <a href=\"#{@assignment.link}\">#{@assignment.title}</a><br />\n"
+    @source_site_string << "URL from Entity picker:(x) <a href=\"#{@assignment.url}\">#{@assignment.title}</a><br />\n"
+    @source_site_string << "<em>Direct</em> URL from Entity picker:(y) <a href=\"#{@assignment.direct_url}\">#{@assignment.title}</a><br />\n<br />\n#{@assignment.direct_url}<br />\n<br />\n"
+    @source_site_string << "<em>Portal</em> URL from Entity picker:(z) <a href=\"#{@assignment.portal_url}\">#{@assignment.title}</a><br />\n<br />\n#{@assignment.portal_url}<br />\n<br />\n"
+
     @announcement = make AnnouncementObject, :site=>@site1.name, :body=>@assignment.link
     @announcement.create
 
-    @source_site_string << "<br />Announcement link: <a href=\"#{@announcement.link}\">#{@announcement.title}</a><br />"
+    @source_site_string << "<br />\nAnnouncement link: <a href=\"#{@announcement.link}\">#{@announcement.title}</a><br />"
 
     @file = make FileObject, :site=>@site1.name, :name=>"flower02.jpg", :source_path=>@file_path+"images/"
     @file.create
@@ -108,24 +108,60 @@ class TestImportSite < Test::Unit::TestCase
     @source_site_string << "<br />Wiki: <a href=\"#{@wiki.href}\">#{@wiki.title}</a><br />"
 
     @syllabus = make SyllabusObject, @content=>@source_site_string, :site=>@site1.name
-=end
+    @syllabus.create
+
+    @source_site_string << "<br />Syllabus: "
+
     @assignment.edit :instructions=>@source_site_string
 
-    #@announcement.edit :body=>@source_site_string
+    @announcement.edit :body=>@source_site_string
 
-    #@htmlpage.edit_content @source_site_string
+    @htmlpage.edit_content @source_site_string
 
-    #@nestedhtmlpage.edit_content @source_site_string
+    @nestedhtmlpage.edit_content @source_site_string
 
-    #@section1.edit :editor_content=>@source_site_string
+    @section1.edit :editor_content=>@source_site_string
 
     @site2 = make SiteObject
     @site2.create_and_reuse_site @site1.name
 
-    @new_assignment = make AssignmentObject, :site=>@site2.name, @status=>"Draft", :title=>@assignment.title
+    @new_assignment = make AssignmentObject, :site=>@site2.name, :status=>"Draft", :title=>@assignment.title
     @new_assignment.get_info
 
-    puts "Original Assignment ID: #{@assignment.id}\n\n"
+    puts "Web Content Link 1 updated? " + (@browser.link(:text=>@web_content1.title, :href=>/#{@site2.id}/).present? ? "yes" : "no")
+    puts "Web Content Link 2 updated? " + (@browser.link(:text=>@web_content2.title, :href=>/#{@site2.id}/).present? ? "yes" : "no")
+
+    def check_this_stuff(thing)
+      puts "Site ID Updated? " + (thing[/Site ID: #{@site2.id}/]==nil ? "no" : "yes")
+      puts "Assignment ID updated? " + (thing[/ID:\(n\) #{@new_assignment.id}/]==nil ? "no" : "yes")
+      puts "Old Assignment ID still there? "  + (thing[/ID:\(n\) #{@assignment.id}/]==nil ? "no" : "yes")
+      puts "Assignment Link updated? " + (thing[/hand.\): <a href.+#{@new_assignment.link}.+doView_assignment/]==nil ? "no" : "yes")
+      puts "Entity picker Assignment URL updated? " + (thing[/\(x\) <a href.+#{@new_assignment.url}.+doView_submission/]==nil ? "no" : "yes")
+      puts "Assignment Direct link updated? " + (thing[/\(y\) <a href..#{@new_assignment.direct_url}/]==nil ? "no" : "yes")
+      puts "Assignment Portal Link updated? " + (thing[/\(z\) <a href..#{@new_assignment.portal_url}/]==nil ? "no" : "yes")
+      puts "Announcement Link updated? " + (thing[/#{@announcement.id}/]==nil ? "yes" : "no")
+      puts "File Link updated? " + (thing[/Uploaded file:.+#{@site2.id}.+#{@file.name}/]==nil ? "no" : "yes")
+      puts "HTML Page Link updated? " + (thing[/#{@site2.id}\/#{@htmlpage.name}/]==nil ? "no" : "yes")
+      puts "Nested HTML Page Link updated? " + (thing[/#{@site2.id}\/#{@folder.name}\/#{@nestedhtmlpage.name}/]==nil ? "no" : "yes")
+      puts "Module Link updated? " + (thing[/Module:.+#{@site2.id}.+#{@module.name}/]==nil ? "no" : "yes")
+      puts "Section 1 Link updated? " + (thing[/Section 1:.+#{@site2.id}.+#{@section1.name}/]==nil ? "no" : "yes")
+      puts "Section 2 Link updated? " + (thing[/Section 2:.+#{@site2.id}.+#{@section2.name}/]==nil ? "no" : "yes")
+      puts "Section 3 Link updated? " + (thing[/Section 3:.+#{@site2.id}.+#{@section3.name}/]==nil ? "no" : "yes")
+      puts "Section 4 Link updated? " + (thing[/Section 4:.+#{@site2.id}.+#{@section4.name}/]==nil ? "no" : "yes")
+      #puts "Wiki link updated? " + (thing[/#{@site2.id}/]==nil ? "no" : "yes")
+      #puts "Syllabus Link updated? " + (thing[/Syllabus: #{@site2.id}/]==nil ? "no" : "yes")
+    end
+
+    puts "\nChecking Assignment...\n"
+    check_this_stuff(@new_assignment.instructions)
+
+    @new_announcement = make AnnouncementObject, :site=>@site2.name, :title=>@announcement.title
+    @new_announcement.view
+
+    puts "\nChecking Announcement...\n"
+    check_this_stuff(@new_announcement.message_html)
+    
+    puts "\nOriginal Assignment ID: #{@assignment.id}\n\n"
     puts "Original Assignment instructions:\n\n"
     puts @assignment.instructions
     puts "\n\n"

@@ -6,7 +6,7 @@ class AnnouncementObject
 
   attr_accessor :title, :body, :site, :link, :access, :availability,
                 :subject, :saved_by, :date, :creation_date, :groups,
-                :message, :message_html
+                :message, :message_html, :id
 
   def initialize(browser, opts={})
     @browser = browser
@@ -38,6 +38,7 @@ class AnnouncementObject
     end
     on_page Announcements do |page|
       @link = page.href(@title)
+      @id = @link[/(?<=msg\/).+(?=\/main\/)/]
     end
   end
 
