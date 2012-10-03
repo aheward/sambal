@@ -50,4 +50,14 @@ class WikiObject
     end
   end
 
+  def get_content
+    open_my_site_by_name @site unless @browser.title=~/#{@site}/
+    wiki unless @browser.title=~/Wiki$/
+    on Rwiki do |edit|
+      edit.open_wiki @title
+      edit.edit
+      @content = edit.content.value
+    end
+  end
+
 end

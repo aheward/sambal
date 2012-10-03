@@ -122,6 +122,4 @@ class AssignmentObject
     end
   end
 
-
-
 end

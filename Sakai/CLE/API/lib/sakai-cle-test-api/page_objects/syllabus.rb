@@ -61,7 +61,7 @@ class SyllabusEdit < SyllabusBase
 
   action(:update) { |b| b.frm.button(:value=>"Update").click }
 
-  # Opens the specified item and instantiates the XXXX Class.
+  # Opens the specified item
   def open_item(title)
     frm.link(:text=>title).click
   end

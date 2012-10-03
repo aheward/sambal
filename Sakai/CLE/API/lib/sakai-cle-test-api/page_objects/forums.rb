@@ -63,14 +63,12 @@ class Forums < BasePage
     frm.link(:id=>/topics:\d+:delete_confirm/, :text=>"Delete", :index=>index).click
   end
 
-  def open_forum(forum_title)
-    frm.link(:text=>forum_title).click
+  def open_forum(title)
+    frm.link(:text=>/#{title}/).wait_until_present(7)
+    frm.link(:text=>/#{title}/).click
   end
+  alias open_topic open_forum
 
-  # TopicPage
-  def open_topic(topic_title)
-    frm.link(:text=>topic_title).click
-  end
 end
 
 class TopicPage < BasePage
@@ -177,6 +175,7 @@ class EditForum < BasePage
 
   # Forums
   action(:save) { |b| b.frm.button(:value=>"Save").click }
+  action(:cancel) { |b| b.frm.button(:value=>"Cancel").click }
 
   # AddEditTopic
   action(:save_and_add) { |b| b.frm.button(:value=>"Save Settings & Add Topic").click }
@@ -212,6 +211,7 @@ class AddEditTopic < BasePage
 
   # Forums
   action(:save) { |b| b.frm.button(:value=>"Save").click }
+  action(:cancel) { |b| b.frm.button(:value=>"Cancel").click }
 
   action(:add_attachments) { |b| b.frm.button(:value=>/Add.+ttachment/).click }
 
@@ -238,5 +238,17 @@ class AddEditTopic < BasePage
 
   element(:title) { |b| b.frm.text_field(:id=>"revise:topic_title") }
   element(:short_description) { |b| b.frm.text_field(:id=>"revise:topic_shortDescription") }
+
+end
+
+class ForumView < BasePage
+
+  frame_element
+
+  action(:view_full_description) { |b| b.frm.link(id: "msgForum:forum_extended_show").click }
+  action(:hide_full_description) { |b| b.frm.link(id: "msgForum:forum_extended_hide").click }
+
+  value(:short_description) { |b| b.frm.span(class: "shortDescription").text }
+  value(:description_html) { |b| b.frm.div(class: "toggle").div(class: "textPanel").html }
 
 end

@@ -13,6 +13,8 @@ class CalendarBase < BasePage
 
       # ImportStepOne
       action(:import) { |b| b.frm.link(:text=>"Import").click }
+
+      #TODO: Finish adding menu buttons here
     end
   end
 
@@ -26,32 +28,18 @@ class Calendar < CalendarBase
 
   menu_elements
 
-  # Selects the specified item in the View select list,
-  # then reinstantiates the Class.
-  def select_view(item)
-    frm.select(:id=>"view").select(item)
-  end
-
   # Selects the specified item in the View select list.
-  # This is the same method as the select_view method, except
-  # that it does not reinstantiate the class. Use this if you're
-  # not concerned about throwing obsolete element errors when
-  # the page updates.
-  def view=(item)
-    frm.select(:id=>"view").select(item)
-  end
+  element(:view) { |b| b.frm.select(:id=>"view").select(item) }
 
   # Selects the specified item in the Show select list.
-  def show=(item)
-    frm.select(:id=>"timeFilterOption").select(item)
-  end
+  element(:show) { |b| b.frm.select(:id=>"timeFilterOption") }
+  alias :show_events :show
 
   # Clicks the link to the specified event, then
   # instantiates the EventDetail class.
   def open_event(title)
     truncated = title[0..5]
     frm.link(:text=>/#{Regexp.escape(truncated)}/).click
-    EventDetail.new(@browser)
   end
 
   # Returns the href value of the target link
@@ -60,62 +48,35 @@ class Calendar < CalendarBase
   # validation by title text alone will not work.
   def event_href(title)
     truncated = title[0..5]
-    return frm.link(:text=>/#{Regexp.escape(truncated)}/).href
-  end
-
-  def show_events=(item)
-    frm.select(:id=>"timeFilterOption").select(item)
+    frm.link(:text=>/#{Regexp.escape(truncated)}/).href
   end
 
   # Selects the specified value in the start month select list.
-  def start_month=(item)
-    frm.select(:id=>"customStartMonth").select(item)
-  end
+  element(:start_month) { |b| b.frm.select(:id=>"customStartMonth") }
 
   # Selects the specified value in the start day select list.
-  def start_day=(item)
-    frm.select(:id=>"customStartDay").select(item)
-  end
+  element(:start_day) { |b| b.frm.select(:id=>"customStartDay") }
 
   # Selects the specified value in the start year select list.
-  def start_year=(item)
-    frm.select(:id=>"customStartYear").select(item)
-  end
+  element(:start_year) { |b| b.frm.select(:id=>"customStartYear") }
 
   # Selects the specified value in the end month select list.
-  def end_month=(item)
-    frm.select(:id=>"customEndMonth").select(item)
-  end
+  element(:end_month) { |b| b.frm.select(:id=>"customEndMonth") }
 
   # Selects the specified value in the End Day select list.
-  def end_day=(item)
-    frm.select(:id=>"customEndDay").select(item)
-  end
+  element(:end_day) { |b| b.frm.select(:id=>"customEndDay") }
 
   # Selects the specified value in the End Year select list.
-  def end_year=(item)
-    frm.select(:id=>"customEndYear").select(item)
-  end
+  element(:end_year) { |b| b.frm.select(:id=>"customEndYear") }
 
   # Clicks the Filter Events button, then re-instantiates
   # the Calendar class to avoid the possibility of an
   # ObsoleteElement error.
-  def filter_events
-    frm.button(:name=>"eventSubmit_doCustomdate").click
-    Calendar.new(@browser)
-  end
+  action(:filter_events) { |b| b.frm.button(:name=>"eventSubmit_doCustomdate").click }
 
   # Clicks the Go to Today button, then reinstantiates
   # the Calendar class.
-  def go_to_today
-    frm.button(:value=>"Go to Today").click
-    Calendar.new(@browser)
-  end
-
-  # Returns an array of the titles of the displayed events.
-  def event_list
-    events_list
-  end
+  action(:go_to_today) { |b| b.frm.button(:value=>"Go to Today").click }
 
   # Returns an array for the listed events.
   # This array contains more than simply strings of the event titles, because
@@ -128,6 +89,7 @@ class Calendar < CalendarBase
   # the entire href string for every event listed on the page. Having all three items
   # available should ensure that verification steps don't give false results--especially
   # when you are doing a negative test (checking that an event is NOT present).
+  # TODO: Turn this into an array of hashes
   def events_list
     list = []
     if frm.table(:class=>"calendar").exist?
@@ -145,43 +107,29 @@ class Calendar < CalendarBase
     list.uniq!
     return list
   end
+  alias event_list events_list
+  alias events event_list
 
   # Clicks the "Previous X" button, where X might be Day, Week, or Month,
   # then reinstantiates the Calendar class to ensure against any obsolete element
   # errors.
-  def previous
-    frm.button(:name=>"eventSubmit_doPrev").click
-    Calendar.new(@browser)
-  end
+  action(:previous) { |b| b.frm.button(:name=>"eventSubmit_doPrev").click }
 
   # Clicks the "Next X" button, where X might be Day, Week, or Month,
   # then reinstantiates the Calendar class to ensure against any obsolete element
   # errors.
-  def next
-    frm.button(:name=>"eventSubmit_doNext").click
-    Calendar.new(@browser)
-  end
+  action(:next) { |b| b.frm.button(:name=>"eventSubmit_doNext").click }
 
   # Clicks the "Today" button and reinstantiates the class.
-  def today
-    frm.button(:value=>"Today").click
-    Calendar.new(@browser)
-  end
+  action(:today) { |b| b.frm.button(:value=>"Today").click }
 
-  def earlier
-    frm().link(:text=>"Earlier").click
-    Calendar.new(@browser)
-  end
+  action(:earlier) { |b| b.frm.link(:text=>"Earlier").click }
 
-  def later
-    frm().link(:text=>"Later").click
-    Calendar.new(@browser)
-  end
+  action(:later) { |b| b.frm.link(:text=>"Later").click }
 
   # Clicks the "Set as Default View" button
-  def set_as_default_view
-    frm.link(:text=>"Set as Default View").click
-  end
+  action(:set_as_default_view) { |b| b.frm.link(:text=>"Set as Default View").click }
+
 end
 
 # The page that appears when you click on an event in the Calendar
@@ -190,39 +138,19 @@ class EventDetail < CalendarBase
   menu_elements
   # Clicks the Go to Today button, then instantiates
   # the Calendar class.
-  def go_to_today
-    frm.button(:value=>"Go to Today").click
-    Calendar.new(@browser)
-  end
+  action(:go_to_today) { |b| b.frm.button(:value=>"Go to Today").click }
 
-  def back_to_calendar
-    frm.button(:value=>"Back to Calendar").click
-    Calendar.new(@browser)
-  end
+  action(:back_to_calendar) { |b| b.frm.button(:value=>"Back to Calendar").click }
 
-  def last_event
-    frm().button(:value=>"< Last Event").click
-    EventDetail.new(@browser)
-  end
+  action(:last_event) { |b| b.frm().button(:value=>"< Last Event").click }
 
-  def next_event
-    frm().button(:value=>"Next Event >").click
-    EventDetail.new(@browser)
-  end
+  action(:next_event) { |b| b.frm().button(:value=>"Next Event >").click }
 
-  def event_title
-    frm.div(:class=>"portletBody").h3.text
-  end
+  value(:event_title) { |b| b.frm.div(:class=>"portletBody").h3.text }
 
-  def edit
-    frm.button(:value=>"Edit").click
-    AddEditEvent.new(@browser)
-  end
+  action(:edit) { |b| b.frm.button(:value=>"Edit").click }
 
-  def remove_event
-    frm.button(:value=>"Remove event").click
-    DeleteConfirm.new(@browser)
-  end
+  action(:remove_event) { |b| b.frm.button(:value=>"Remove event").click }
 
   # Returns a hash object containing the contents of the event details
   # table on the page, with each of the header column items as a Key
@@ -232,8 +160,10 @@ class EventDetail < CalendarBase
     frm.table(:class=>"itemSummary").rows.each do |row|
       details.store(row.th.text, row.td.text)
     end
-    return details
+    details
   end
+
+  value(:message_html) { |b| b.frm.th(text: "Description").parent.td.html }
 
 end
 
@@ -244,34 +174,24 @@ class AddEditEvent < CalendarBase
 
   menu_elements
 
-  expected_element :message_editor
+  expected_element :editor
 
   # Calendar class
   action(:save_event) { |b| b.frm.button(:value=>"Save Event").click }
 
-  #
   def message=(text)
-    message_editor.send_keys(text)
+    editor.td(:id, "xEditingArea").frame(:index=>0).send_keys(text)
   end
 
   # The FCKEditor object. Use this method to set up a "wait_until_present"
   # step, since sometimes it takes a long time for this object to load.
-  element(:message_editor) { |b| b.frm.frame(:id, "description___Frame").td(:id, "xEditingArea").frame(:index=>0) }
+  element(:editor) { |b| b.frm.frame(:id, "description___Frame") }
 
-  def frequency
-    frm.button(:name=>"eventSubmit_doEditfrequency").click
-    EventFrequency.new(@browser)
-  end
+  action(:frequency) { |b| b.frm.button(:name=>"eventSubmit_doEditfrequency").click }
 
-  def add_attachments
-    frm.button(:value=>"Add Attachments").click
-    EventAttach.new(@browser)
-  end
+  action(:add_attachments) { |b| b.frm.button(:value=>"Add Attachments").click }
 
-  def add_remove_attachments
-    frm.button(:value=>"Add/remove attachments").click
-    EventAttach.new(@browser)
-  end
+  action(:add_remove_attachments) { |b| b.frm.button(:value=>"Add/remove attachments").click }
 
   # Returns true if the page has a link with the
   # specified file name. Use for test case asserts.
@@ -309,15 +229,9 @@ end
 # Event page.
 class EventFrequency < CalendarBase
 
-  def save_frequency
-    frm.button(:value=>"Save Frequency").click
-    AddEditEvent.new(@browser)
-  end
+  action(:save_frequency) { |b| b.frm.button(:value=>"Save Frequency").click }
 
-  def cancel
-    frm.button(:value=>"Cancel").click
-    AddEditEvent.new(@browser)
-  end
+  action(:cancel) { |b| b.frm.button(:value=>"Cancel").click }
 
   element(:event_frequency) { |b| b.frm.select(:id=>"frequencySelect") }
   element(:interval) { |b| b.frm.select(:id=>"interval") }
@@ -336,21 +250,9 @@ class AddEditFields < CalendarBase
   # Clicks the Save Field Changes buton and instantiates
   # The Calendar or EventDetail class--unless the Alert Message box appears,
   # in which case it re-instantiates the class.
-  def save_field_changes
-    frm.button(:value=>"Save Field Changes").click
-    if frm.div(:class=>"alertMessage").exist?
-      AddEditFields.new(@browser)
-    elsif frm.button(:value=>"Back to Calendar").exist?
-      EventDetail.new(@browser)
-    else
-      Calendar.new(@browser)
-    end
-  end
+  action(:save_field_changes) { |b| b.frm.button(:value=>"Save Field Changes").click }
 
-  def create_field
-    frm.button(:value=>"Create Field").click
-    AddEditFields.new(@browser)
-  end
+  action(:create_field) { |b| b.frm.button(:value=>"Create Field").click }
 
   # Checks the checkbox for the specified field
   def check_remove(field_name)
@@ -365,7 +267,7 @@ class ImportStepOne < BasePage
 
   frame_element
 
-  action(:continue) { |b| bfrm.button(:value=>"Continue").click }
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
   element(:microsoft_outlook) { |b| b.frm.radio(:id=>"importType_Outlook") }
   element(:meeting_maker) { |b| b.frm.radio(:id=>"importType_MeetingMaker") }
   element(:generic_calendar_import) { |b| b.frm.radio(:id=>"importType_Generic") }
@@ -412,7 +314,7 @@ class ImportStepThree < BasePage
       name = item[/(?<=\s).+(?=\s\s\()/]
       names << name
     end
-    return names
+    names
   end
 
   # Returns the date of the specified event

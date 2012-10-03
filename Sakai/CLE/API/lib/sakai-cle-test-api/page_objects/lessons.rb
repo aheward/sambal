@@ -56,6 +56,7 @@ class Lessons < LessonsBase
   def open_lesson(name)
     frm.link(:text=>name).click
   end
+  alias open_section open_lesson
 
   def href(name)
     frm.link(:text=>name).href

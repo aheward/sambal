@@ -36,4 +36,38 @@ class SyllabusObject
     end
   end
 
+  def edit opts={}
+    open_my_site_by_name @site unless @browser.title=~/#{@site}/
+    syllabus unless @browser.title=~/Syllabus$/
+    on Syllabus do |syllabus|
+      reset
+      syllabus.create_edit
+    end
+    on SyllabusEdit do |edit|
+      edit.open_item @title
+    end
+    on AddEditSyllabusItem do |item|
+      item.title.set opts[:title] unless opts[:title]==nil
+      item.enter_source_text(item.editor, opts[:content]) unless opts[:content]==nil
+    end
+    @title = opts[:title] unless opts[:title]==nil
+    @content = opts[:content] unless opts[:content]==nil
+  end
+
+  def get_properties
+    open_my_site_by_name @site unless @browser.title=~/#{@site}/
+    syllabus unless @browser.title=~/Syllabus$/
+    on Syllabus do |syllabus|
+      reset
+      syllabus.create_edit
+    end
+    on SyllabusEdit do |edit|
+      edit.open_item @title
+    end
+    on AddEditSyllabusItem do |item|
+      @content = item.get_source_text(item.editor)
+      # Add more here as necessary...
+    end
+  end
+
 end
