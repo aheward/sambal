@@ -50,6 +50,7 @@ class SiteObject
       # Select the Course Site radio button
       page.course_site.set
       # Store the selected term value for use later
+      # TODO: Add logic here in case we want to actually SET the term value instead.
       @term = page.academic_term.value
 
       page.continue
@@ -203,6 +204,57 @@ class SiteObject
     @browser.frame(:class=>"portletMainIframe").link(:href=>/xsl-portal.site/, :index=>0).href =~ /(?<=\/site\/).+/
     @id = $~.to_s
 
+  end
+
+  def duplicate opts={}
+
+    defaults = {
+        :name => random_alphanums,
+        :term => @term,
+        :subject => @subject,
+        :course => @course,
+        :section => @section,
+        :authorizer => @authorizer,
+        :web_content_title => @web_content_title,
+        :web_content_source => @web_content_source,
+        :email=>@email,
+        :joiner_role => @joiner_role,
+        :description => @description,
+        :short_description => @short_description,
+        :site_contact_name => @site_contact_name,
+        :site_contact_email => @site_contact_email
+    }
+    options = defaults.merge(opts)
+
+    new_site = make SiteObject, options
+
+    new_site.subject=options[:subject]
+    new_site.course=options[:course]
+    new_site.section=options[:section]
+    new_site.authorizer=options[:authorizer]
+    new_site.web_content_source=options[:web_content_source]
+    new_site.email=options[:email]
+    new_site.joiner_role=options[:joiner_role]
+    new_site.web_content_title=options[:web_content_title]
+    new_site.description=options[:description]
+    new_site.short_description=options[:short_description]
+    new_site.site_contact_name=options[:site_contact_name]
+    new_site.site_contact_email=options[:site_contact_email]
+    new_site.term=options[:term]
+
+    open_my_site_by_name @site unless @browser.title=~/#{@site}/
+    site_editor unless @browser.title=~/Site Editor$/
+    on SiteEditor do |edit|
+      edit.duplicate_site
+    end
+    on DuplicateSite do |dupe|
+      dupe.title.set new_site.name
+      dupe.academic_term.select new_site.term
+      dupe.duplicate
+    end
+    on SiteEditor do |edit|
+
+    end
   end
 
 end

@@ -189,7 +189,6 @@ class DuplicateSite < SiteSetupBase
   def duplicate
     frm.button(:value=>"Duplicate").click
     frm.span(:class=>"submitnotif").wait_while_present(300)
-    SiteEditor.new(@browser)
   end
 
   # Returns the site name in the header, for verification.
