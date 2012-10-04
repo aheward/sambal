@@ -164,39 +164,39 @@ describe "Duplicate Site" do
     #puts "Syllabus Link updated? " + (thing[/Syllabus: #{@site2.id}/]==nil ? "no" : "yes")
   end
 
-  it "imports Assignments correctly" do
+  it "duplicates Assignments correctly" do
 
     check_this_stuff(@new_assignment.instructions)
   end
 
-  it "imports Web Content pages correctly" do
+  it "duplicates Web Content pages correctly" do
     open_my_site_by_name @site2.name unless @browser.title=~/#{@site2.name}/
     @browser.link(:text=>@web_content1.title, :href=>/#{@site2.id}/).should be_present
     @browser.link(:text=>@web_content2.title, :href=>/#{@site2.id}/).should be_present
 
   end
 
-  it "imports Announcements correctly" do
+  it "duplicates Announcements correctly" do
     @new_announcement = make AnnouncementObject, :site=>@site2.name, :title=>@announcement.title
     @new_announcement.view
 
     check_this_stuff(@new_announcement.message_html)
   end
 
-  it "imports Forums correctly" do
+  it "duplicates Forums correctly" do
     @new_forum = make ForumObject, :site=>@site2.name, :title=>@forum.title
     @new_forum.view
 
     check_this_stuff(@new_forum.description_html)
   end
 
-  it "imports Topics correctly" do
+  it "duplicates Topics correctly" do
     @new_topic = make TopicObject, :site=>@site2.name, :forum=>@forum.title, :title=>@topic.title
     @new_topic.view
     check_this_stuff(@new_topic.description_html)
   end
 
-  xit "imports Lessons correctly" do
+  xit "duplicates Lessons correctly" do
     lessons
     on Lessons do |lessons|
       lessons.lessons_list.should include @module.title
@@ -213,21 +213,21 @@ describe "Duplicate Site" do
     check_this_stuff @text
   end
 
-  it "imports Syllabi correctly" do
+  it "duplicates Syllabi correctly" do
     @new_syllabus = make SyllabusObject, :site=>@site2.name, :title=>@syllabus.title
     @new_syllabus.get_properties
 
     check_this_stuff @new_syllabus.content
   end
 
-  it "imports Wikis correctly" do
+  it "duplicates Wikis correctly" do
     @new_wiki = make WikiObject, :site=>@site2.name, :title=>@wiki.title
     @new_wiki.get_content
 
     @new_wiki.content.should == @wiki.content
   end
 
-  it "imports Resources correctly" do
+  it "duplicates Resources correctly" do
     resources
     on Resources do |resources|
       resources.folder_names.should include @folder.name
@@ -235,7 +235,7 @@ describe "Duplicate Site" do
     end
   end
 
-  it "imports Events correctly" do
+  it "duplicates Events correctly" do
     @new_event = make EventObject, :title=>@event.title, :site=>@site2.name
     @new_event.view
 

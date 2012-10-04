@@ -88,9 +88,9 @@ class SiteSetup < SiteSetupBase
     return titles
   end
   
-  element(:view) { |b| b.frm.select_list(:id=>"view").click }
+  element(:view) { |b| b.frm.select(:id=>"view").click }
   action(:clear_search) { |b| b.frm.button(:value=>"Clear Search").click }
-  element(:select_page_size) { |b| b.frm.select_list(:id=>"selectPageSize").click }
+  element(:select_page_size) { |b| b.frm.select(:id=>"selectPageSize").click }
   action(:sort_by_title) { |b| b.frm.link(:text=>"Worksite Title").click }
   action(:sort_by_type) { |b| b.frm.link(:text=>"Type").click }
   action(:sort_by_creator) { |b| b.frm.link(:text=>"Creator").click }
@@ -171,8 +171,8 @@ class CreateNewGroup < SiteSetupBase
   
   element(:title) { |b| b.frm.text_field(:id=>"group_title") }
   element(:description) { |b| b.frm.text_field(:id=>"group_description") }
-  element(:site_member_list) { |b| b.frm.select_list(:name=>"siteMembers-selection").click }
-  element(:group_member_list) { |b| b.frm.select_list(:name=>"groupMembers-selection").click }
+  element(:site_member_list) { |b| b.frm.select(:name=>"siteMembers-selection").click }
+  element(:group_member_list) { |b| b.frm.select(:name=>"groupMembers-selection").click }
   action(:right) { |b| b.frm.button(:name=>"right", :index=>0,).click }
   action(:left) { |b| b.frm.button(:name=>"left", :index=>0).click }
   action(:all_right) { |b| b.frm.button(:name=>"right", :index=>1).click }
@@ -197,7 +197,7 @@ class DuplicateSite < SiteSetupBase
   end
 
     element(:site_title) { |b| b.frm.text_field(:id=>"title") }
-    element(:academic_term) { |b| b.frm.select_list(:id=>"selectTerm").click }
+    element(:academic_term) { |b| b.frm.select(:id=>"selectTerm") }
 end
 
 # Page for Adding Participants to a Site in Site Setup
@@ -210,8 +210,8 @@ class SiteSetupAddParticipants < SiteSetupBase
     SiteSetupChooseRole.new @browser
   end
   
-  element(:official_participants) { |b| b.frm.text_area(:id=>"content::officialAccountParticipant") }
-  element(:non_official_participants) { |b| b.frm.text_area(:id=>"content::nonOfficialAccountParticipant") }
+  element(:official_participants) { |b| b.frm.text_field(:id=>"content::officialAccountParticipant") }
+  element(:non_official_participants) { |b| b.frm.text_field(:id=>"content::nonOfficialAccountParticipant") }
   element(:assign_all_to_same_role) { |b| b.frm.radio(:id=>"content::role-row:0:role-select") }
   element(:assign_each_individually) { |b| b.frm.radio(:id=>"content::role-row:1:role-select") }
   element(:active_status) { |b| b.frm.radio(:id=>"content::status-row:0:status-select") }
@@ -233,7 +233,7 @@ class SiteSetupChooseRolesIndiv < SiteSetupBase
   
   action(:back) { |b| b.frm.button(:name=>"command link parameters&Submitting%20control=content%3A%3Aback&Fast%20track%20action=siteAddParticipantHandler.processDifferentRoleBack").click }
   action(:cancel) { |b| b.frm.button(:name=>"command link parameters&Submitting%20control=content%3A%3Acancel&Fast%20track%20action=siteAddParticipantHandler.processCancel").click }
-  element(:user_role) { |b| b.frm.select_list(:id=>"content::user-row:0:role-select-selection").click }
+  element(:user_role) { |b| b.frm.select(:id=>"content::user-row:0:role-select-selection") }
 
 end
 
@@ -460,9 +460,9 @@ class SiteType < SiteSetupBase
   element(:project_site) { |b| b.frm.radio(:id=>"project") }
   element(:portfolio_site) { |b| b.frm.radio(:id=>"portfolio") }
   element(:create_site_from_template) { |b| b.frm.radio(:id=>"copy") }
-  element(:academic_term) { |b| b.frm.select_list(:id=>"selectTerm") }
-  element(:select_template) { |b| b.frm.select_list(:id=>"templateSiteId").click }
-  element(:select_term) { |b| b.frm.select_list(:id=>"selectTermTemplate").click }
+  element(:academic_term) { |b| b.frm.select(:id=>"selectTerm") }
+  element(:select_template) { |b| b.frm.select(:id=>"templateSiteId") }
+  element(:select_term) { |b| b.frm.select(:id=>"selectTermTemplate") }
   action(:cancel) { |b| b.frm.button(:id=>"cancelCreate").click }
   element(:copy_users) { |b| b.frm.checkbox(:id=>"copyUsers") }
   element(:copy_content) { |b| b.frm.checkbox(:id=>"copyContent") }
@@ -487,15 +487,15 @@ class AddMultipleTools < SiteSetupBase
     # itself--for now, anyway.
   element(:site_email_address) { |b| b.frm.text_field(:id=>"emailId") }
   element(:basic_lti_title) { |b| b.frm.text_field(:id=>"title_sakai.basiclti") }
-  element(:more_basic_lti_tools) { |b| b.frm.select_list(:id=>"num_sakai.basiclti").click }
+  element(:more_basic_lti_tools) { |b| b.frm.select(:id=>"num_sakai.basiclti") }
   element(:lesson_builder_title) { |b| b.frm.text_field(:id=>"title_sakai.lessonbuildertool") }
-  element(:more_lesson_builder_tools) { |b| b.frm.select_list(:id=>"num_sakai.lessonbuildertool").click }
+  element(:more_lesson_builder_tools) { |b| b.frm.select(:id=>"num_sakai.lessonbuildertool")  }
   element(:news_title) { |b| b.frm.text_field(:id=>"title_sakai.news") }
   element(:news_url_channel) { |b| b.frm.text_field(:name=>"channel-url_sakai.news") }
-  element(:more_news_tools) { |b| b.frm.select_list(:id=>"num_sakai.news").click }
+  element(:more_news_tools) { |b| b.frm.select(:id=>"num_sakai.news")  }
   element(:web_content_title) { |b| b.frm.text_field(:id=>"title_sakai.iframe") }
   element(:web_content_source) { |b| b.frm.text_field(:id=>"source_sakai.iframe") }
-  element(:more_web_content_tools) { |b| b.frm.select_list(:id=>"num_sakai.iframe").click }
+  element(:more_web_content_tools) { |b| b.frm.select(:id=>"num_sakai.iframe")  }
   action(:back) { |b| b.frm.button(:name=>"Back").click }
   action(:cancel) { |b| b.frm.button(:name=>"Cancel").click }
     
@@ -537,7 +537,7 @@ class CourseSectionInfo < SiteSetupBase
   element(:section) { |b| b.frm.text_field(:name=>/Section:/) }
   element(:authorizers_username) { |b| b.frm.text_field(:id=>"uniqname") }
   element(:special_instructions) { |b| b.frm.text_field(:id=>"additional") }
-  element(:add_more_rosters) { |b| b.frm.select_list(:id=>"number").click }
+  element(:add_more_rosters) { |b| b.frm.select(:id=>"number")  }
   action(:back,) { |b| b.frm.button(:name=>"Back").click }
   action(:cancel) { |b| b.frm.button(:name=>"Cancel").click }
 end
@@ -571,7 +571,7 @@ class SiteAccess < SiteSetupBase
   element(:allow) { |b| b.frm.radio(:id=>"joinable") }
   action(:back) { |b| b.frm.button(:name=>"eventSubmit_doBack").click }
   action(:cancel) { |b| b.frm.button(:name=>"eventSubmit_doCancel_create").click }
-  element(:joiner_role) { |b| b.frm.select_list(:id=>"joinerRole") }
+  element(:joiner_role) { |b| b.frm.select(:id=>"joinerRole") }
 
 end
 

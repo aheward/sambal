@@ -248,13 +248,21 @@ class SiteObject
       edit.duplicate_site
     end
     on DuplicateSite do |dupe|
-      dupe.title.set new_site.name
+      dupe.site_title.set new_site.name
       dupe.academic_term.select new_site.term
       dupe.duplicate
     end
-    on SiteEditor do |edit|
-
+    my_workspace
+    site_setup unless @browser.title=~/Site Setup/
+    on SiteSetup do |sites|
+      sites.search(Regexp.escape(new_site.name))
     end
+    # Get the site id for storage
+    @browser.frame(:class=>"portletMainIframe").link(:href=>/xsl-portal.site/, :index=>0).href =~ /(?<=\/site\/).+/
+    new_site.id = $~.to_s
+
+    new_site
+
   end
 
 end
