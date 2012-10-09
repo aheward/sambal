@@ -39,22 +39,17 @@ class SiteSetup < SiteSetupBase
   element(:search_field) { |b| b.frm.text_field(:id, "search") }
 
   # Clicks the "New" link on the Site Setup page.
-  # instantiates the SiteType class.
-  def new
-    frm.div(:class=>"portletBody").link(:text=>"New").click
-    SiteType.new(@browser)
-  end
+  # next is the SiteType class.
+  action(:new) { |b| b.frm.div(:class=>"portletBody").link(:text=>"New").click }
   
   # Searches for the specified site, then
   # selects the specified Site's checkbox.
-  # Then clicks the Edit button and instantiates
-  # The SiteSetupEdit class.
+  # Then clicks the Edit button
   def edit(site_name)
     search_field.value=Regexp.escape(site_name)
     frm.button(:value=>"Search").click
     frm.div(:class=>"portletBody").checkbox(:name=>"selectedMembers").set
     frm.div(:class=>"portletBody").link(:text, "Edit").click
-    SiteEditor.new(@browser)
   end
 
   # Enters the specified site name string in the search
@@ -63,7 +58,6 @@ class SiteSetup < SiteSetupBase
   def search(site_name)
     search_field.set site_name
     frm.button(:value, "Search").click
-    SiteSetup.new(@browser)
   end
 
   # Searches for the specified site, then
@@ -74,7 +68,6 @@ class SiteSetup < SiteSetupBase
     frm.button(:value=>"Search").click
     frm.checkbox(:name=>"selectedMembers").set
     frm.div(:class=>"portletBody").link(:text, "Delete").click
-    DeleteSite.new(@browser)
   end
   
   # Returns an Array object containing strings of
@@ -119,39 +112,28 @@ class SiteEditor < SiteSetupBase
     frm.table(:class=>/listHier lines/).row(:text=>/#{Regexp.escape(participant)}/).select(:id=>/role/).select(role)
   end
   
-  def update_participants
-    frm.button(:value=>"Update Participants").click
-    SiteEditor.new(@browser)
-  end
+  action(:update_participants) { |b| b.frm.button(:value=>"Update Participants").click }
 
-  def return_button
-    frm.button(:name=>"back")
-  end
+  element(:return_button) { |b| b.frm.button(:name=>"back") }
 
-  def return_to_sites_list
-    return_button.click
-  end
+  action(:return_to_sites_list) { |p| p.return_button.click }
 
   action(:previous) { |b| b.frm.button(:name=>"previous").click }
   action(:printable_version) { |b| b.frm.link(:text=>"Printable Version").click }
 
-  end
+end
 
 
 # Groups page inside the Site Editor
 class Groups < SiteSetupBase
 
   menu_elements
+
+  expected_element :create_new_group_link
+
+  element(:create_new_group_link) { |b| b.frm.link(:text=>"Create New Group") }
   
-  # Clicks the Create New Group link and
-  # instantiates the CreateNewGroup Class.
-  def create_new_group
-    create_new_group_link_element.wait_until_present
-    create_new_group_link
-    CreateNewGroup.new(@browser)
-  end
-  
-  action(:create_new_group_link) { |b| b.frm.link(:text=>"Create New Group").click }
+  action(:create_new_group) { |p| p.create_new_group_link.click }
   action(:auto_groups) { |b| b.frm.link(:text=>"Auto Groups").click }
   action(:remove_checked) { |b| b.frm.button(:id=>"delete-groups").click }
   action(:cancel) { |b| b.frm.button(:id=>"cancel").click }
@@ -164,10 +146,7 @@ class CreateNewGroup < SiteSetupBase
   menu_elements
   
   # Clicks the Add button and instantiates the Groups Class.
-  def add
-    frm.button(:id=>"save").click
-    Groups.new(@browser)
-  end
+  action(:add) { |b| b.frm.button(:id=>"save").click }
   
   element(:title) { |b| b.frm.text_field(:id=>"group_title") }
   element(:description) { |b| b.frm.text_field(:id=>"group_description") }
@@ -205,10 +184,7 @@ class SiteSetupAddParticipants < SiteSetupBase
 
   menu_elements
   
-  def continue
-    frm.button(:value=>"Continue").click
-    SiteSetupChooseRole.new @browser
-  end
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
   
   element(:official_participants) { |b| b.frm.text_field(:id=>"content::officialAccountParticipant") }
   element(:non_official_participants) { |b| b.frm.text_field(:id=>"content::nonOfficialAccountParticipant") }
@@ -218,18 +194,15 @@ class SiteSetupAddParticipants < SiteSetupBase
   element(:inactive_status) { |b| b.frm.radio(:id=>"content::status-row:1:status-select") }
   action(:cancel) { |b| b.frm.button(:id=>"content::cancel").click }
     
-  end
+end
 
 
 # Page for selecting Participant roles individually
 class SiteSetupChooseRolesIndiv < SiteSetupBase
 
   menu_elements
-  
-  def continue
-    frm.button(:value=>"Continue").click
-    #SiteSetupParticipantEmail.new(@browser)
-  end
+
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
   
   action(:back) { |b| b.frm.button(:name=>"command link parameters&Submitting%20control=content%3A%3Aback&Fast%20track%20action=siteAddParticipantHandler.processDifferentRoleBack").click }
   action(:cancel) { |b| b.frm.button(:name=>"command link parameters&Submitting%20control=content%3A%3Acancel&Fast%20track%20action=siteAddParticipantHandler.processCancel").click }
@@ -243,12 +216,16 @@ end
 class SiteSetupChooseRole < BasePage
 
   frame_element
-  
-  def continue
-    frm.button(:value=>"Continue").click
-    SiteSetupParticipantEmail.new(@browser)
+
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
+
+  # Use this method for radio buttons that aren't
+  # included in the default list below. Enter the
+  # radio button's label in the UI.
+  def radio_button(label)
+    frm.radio(:value=>label)
   end
-  
+
   action(:back) { |b| b.frm.button(:name=>"command link parameters&Submitting%20control=content%3A%3Aback&Fast%20track%20action=siteAddParticipantHandler.processSameRoleBack").click }
   action(:cancel) { |b| b.frm.button(:name=>"command link parameters&Submitting%20control=content%3A%3Acancel&Fast%20track%20action=siteAddParticipantHandler.processCancel").click }
   element(:guest) { |b| b.frm.radio(:value=>"Guest") }
@@ -269,11 +246,7 @@ class SiteSetupParticipantEmail < SiteSetupBase
 
   menu_elements
   
-  def continue
-    frm.button(:value=>"Continue").click
-    SiteSetupParticipantConfirmation.new(@browser)
-  end
-  
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
   action(:back) { |b| b.frm.button(:name=>"command link parameters&Submitting%20control=content%3A%3Acontinue&Fast%20track%20action=siteAddParticipantHandler.processEmailNotiBack").click }
   action(:cancel) { |b| b.frm.button(:name=>"command link parameters&Submitting%20control=content%3A%3Acontinue&Fast%20track%20action=siteAddParticipantHandler.processEmailNotiCancel").click }
   element(:send_now) { |b| b.frm.radio(:id=>"content::noti-row:0:noti-select") }
@@ -287,10 +260,7 @@ class SiteSetupParticipantConfirm < SiteSetupBase
 
   menu_elements
   
-  def finish
-    frm.button(:value=>"Finish").click
-    SiteEditor.new(@browser)
-  end
+  action(:finish) { |b| b.frm.button(:value=>"Finish").click }
   
   # Returns the value of the id field for the specified name.
   def id(name)
@@ -426,17 +396,11 @@ class DeleteSite < SiteSetupBase
   
   # Clicks the Remove button, then instantiates
   # the SiteSetup class.
-  def remove
-    frm.button(:value=>"Remove").click
-    SiteSetup.new(@browser)
-  end
+  action(:remove) { |b| b.frm.button(:value=>"Remove").click }
   
   # Clicks the Cancel button, then instantiates
   # the SiteSetup class.
-  def cancel
-    frm.button(:value=>"Cancel").click
-    SiteSetup.new(@browser)
-  end
+  action(:cancel) { |b| b.frm.button(:value=>"Cancel").click }
 
 end
 
@@ -509,19 +473,13 @@ class CourseSectionInfo < SiteSetupBase
   
   # Clicks the Continue button, then instantiates
   # the CourseSiteInfo Class.
-  def continue
-    frm.button(:value=>"Continue").click
-    CourseSiteInfo.new(@browser)
-  end
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
   
   # Clicks the Done button (or the
   # "Done - go to Site" button if it
   # happens to be there), then instantiates
   # the SiteSetup Class.
-  def done
-    frm.button(:value=>/Done/).click
-    SiteSetup.new(@browser)
-  end
+  action(:done) { |b| b. frm.button(:value=>/Done/).click }
   
     # Note that ONLY THE FIRST instances of the
     # subject, course, and section fields
@@ -538,8 +496,9 @@ class CourseSectionInfo < SiteSetupBase
   element(:authorizers_username) { |b| b.frm.text_field(:id=>"uniqname") }
   element(:special_instructions) { |b| b.frm.text_field(:id=>"additional") }
   element(:add_more_rosters) { |b| b.frm.select(:id=>"number")  }
-  action(:back,) { |b| b.frm.button(:name=>"Back").click }
+  action(:back) { |b| b.frm.button(:name=>"Back").click }
   action(:cancel) { |b| b.frm.button(:name=>"Cancel").click }
+
 end
   
 
@@ -554,16 +513,11 @@ class SiteAccess < SiteSetupBase
   # select list is visible or not.
   #
   # Example: page.joiner_role_div.visible?
-  def joiner_role_div
-    frm.div(:id=>"joinerrole")
-  end
+  element(:joiner_role_div) { |b| b.frm.div(:id=>"joinerrole") }
   
   # Clicks the Continue button, then
   # instantiates the ConfirmCourseSiteSetup class.
-  def continue
-    frm.button(:value=>"Continue").click
-    ConfirmSiteSetup.new(@browser)
-  end
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
   
   element(:publish_site) { |b| b.frm.radio(:id=>"publish") }
   element(:leave_as_draft) { |b| b.frm.radio(:id=>"unpublish") }
@@ -583,18 +537,12 @@ class ConfirmSiteSetup < BasePage
   
   # Clicks the Request Site button, then
   # instantiates the SiteSetup Class.
-  def request_site
-    frm.button(:value=>"Request Site").click
-    SiteSetup.new(@browser)
-  end
+  action(:request_site){ |b| b.frm.button(:value=>"Request Site").click }
   
   # For portfolio sites...
   # Clicks the "Create Site" button and
   # instantiates the SiteSetup class.
-  def create_site
-    frm.button(:value=>"Create Site").click
-    SiteSetup.new(@browser)
-  end
+  action(:create_site) { |b| b.frm.button(:value=>"Create Site").click }
   
 end
 
@@ -616,10 +564,7 @@ class CourseSiteInfo < BasePage
 
   # Clicks the Continue button, next is the
   # EditSiteTools Class.
-  def continue
-    frm.button(:value=>"Continue").click
-    EditSiteTools.new(@browser)
-  end
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
   
   element(:short_description) { |b| b.frm.text_field(:id=>"short_description") }
   element(:special_instructions) { |b| b.frm.text_field(:id=>"additional") }
@@ -639,11 +584,8 @@ class PortfolioSiteInfo < BasePage
   def description=(text)
     frm.frame(:id, "description___Frame").td(:id, "xEditingArea").frame(:index=>0).send_keys(text)
   end
-  
-  def continue
-    frm.button(:value=>"Continue").click
-    PortfolioSiteTools.new(@browser)
-  end
+
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
 
   element(:title) { |b| b.frm.text_field(:id=>"title") }
   element(:url_alias) { |b| b.frm.text_field(:id=>"alias_0") }
@@ -659,10 +601,7 @@ class PortfolioSiteTools < BasePage
 
   frame_element
 
-  def continue
-    frm.button(:value=>"Continue").click
-    PortfolioConfigureToolOptions.new(@browser)
-  end
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
 
   element(:all_tools) { |b| b.frm.checkbox(:id=>"all") }
     
@@ -672,11 +611,8 @@ end
 class PortfolioConfigureToolOptions < BasePage
 
   frame_element
-  
-  def continue
-    frm.button(:value=>"Continue").click
-    SiteAccess.new(@browser)
-  end
+
+  action(:continue) { |b| b.frm.button(:value=>"Continue").click }
 
   element(:email) { |b| b.frm.text_field(:id=>"emailId") }
 

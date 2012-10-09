@@ -125,7 +125,6 @@ module Workflows
 
   # Messages class.
   menu_link :messages, :text=>"Messages"
-
   menu_link :my_sites, :text=>"My Sites"
 
   # MyWorkspace Class.

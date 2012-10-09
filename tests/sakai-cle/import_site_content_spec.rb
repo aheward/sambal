@@ -114,6 +114,7 @@ describe "Import Site" do
     @source_site_string << "<br />\nTopic link: <a href=\"#{@topic.direct_link}\">#{@topic.title}</a><br />\n"
 
     @event = make EventObject, :site=>@site1.name, :message=>@source_site_string
+    @event.create
 
     @forum.edit :description=>@source_site_string
 

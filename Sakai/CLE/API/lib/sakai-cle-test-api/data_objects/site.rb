@@ -2,6 +2,8 @@ class SiteObject
 
   include PageHelper
   include Utilities
+  include Randomizers
+  include DateMakers
   include Workflows
 
   attr_accessor :name, :id, :subject, :course, :section, :term, :authorizer,
@@ -228,6 +230,7 @@ class SiteObject
 
     new_site = make SiteObject, options
 
+    new_site.name=options[:name]
     new_site.subject=options[:subject]
     new_site.course=options[:course]
     new_site.section=options[:section]
@@ -264,5 +267,29 @@ class SiteObject
     new_site
 
   end
+
+  def add_official_participants opts={}
+    participants = opts[:participants].join("\n")
+    open_my_site_by_name @name unless @browser.title=~/#{@name}/
+    site_editor unless @browser.title=~/Site Editor$/
+    on SiteEditor do |site|
+      site.add_participants
+    end
+    on SiteSetupAddParticipants do |add|
+      add.official_participants.set participants
+      add.continue
+    end
+    on SiteSetupChooseRole do |choose|
+      choose.radio_button(opts[:role]).set
+      choose.continue
+    end
+    on SiteSetupParticipantEmail do |send|
+      send.continue
+    end
+    on SiteSetupParticipantConfirm do |confirm|
+      confirm.finish
+    end
+  end
+
 
 end

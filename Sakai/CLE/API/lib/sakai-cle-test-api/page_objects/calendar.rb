@@ -89,23 +89,20 @@ class Calendar < CalendarBase
   # the entire href string for every event listed on the page. Having all three items
   # available should ensure that verification steps don't give false results--especially
   # when you are doing a negative test (checking that an event is NOT present).
-  # TODO: Turn this into an array of hashes
   def events_list
-    list = []
+    list = {}
     if frm.table(:class=>"calendar").exist?
       events_table = frm.table(:class=>"calendar")
     else
       events_table = frm.table(:class=>"listHier lines nolines")
     end
     events_table.links.each do |link|
-      list << link.title
-      list << link.text
-      list << link.href
-      list << link.html[/(?<="location=").+doDescription/]
+      list.store(link.title, {:text=>link.text,
+                              :href=>link.href,
+                              :html=>link.html[/(?<="location=").+doDescription/] }
+                )
     end
-    list.compact!
-    list.uniq!
-    return list
+    list
   end
   alias event_list events_list
   alias events event_list

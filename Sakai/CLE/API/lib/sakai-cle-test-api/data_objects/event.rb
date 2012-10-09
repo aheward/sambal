@@ -44,7 +44,7 @@ class EventObject
     open_my_site_by_name @site unless @browser.title=~/#{@site}/
     calendar unless @browser.title=~/Calendar$/
     on Calendar do |cal|
-      cal.add
+      cal.add_event
     end
     on AddEditEvent do |add_event|
       add_event.enter_source_text add_event.editor, @message

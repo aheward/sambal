@@ -1,136 +1,61 @@
-# 
-# == Synopsis
-#
-# Tests creation of several assignments with various properties
-#
-#
-# Author: Abe Heward (aheward@rSmart.com)
-gem "test-unit"
-require "test/unit"
+require 'rspec'
 require 'sakai-cle-test-api'
 require 'yaml'
 
-class TestCreateAssignments < Test::Unit::TestCase
-  
-  include Utilities
+describe "Assignments" do
 
-  def setup
-    
+  include Utilities
+  include Workflows
+  include PageHelper
+  include Randomizers
+  include DateMakers
+
+  before :all do
+
     # Get the test configuration data
     @config = YAML.load_file("config.yml")
     @directory = YAML.load_file("directory.yml")
     @sakai = SakaiCLE.new(@config['browser'], @config['url'])
     @browser = @sakai.browser
-    # Test user is an instructor
-    @user_name = @directory['person3']['id']
-    @password = @directory['person3']['password']
-    # This script requires a second test user (instructor)
-    @user_name1 = @directory['person4']['id']
+
+    @student = @directory['person1']['id']
+    @spassword = @directory['person1']['password']
+    @instructor1 = @directory['person3']['id']
+    @ipassword = @directory['person3']['password']
+
+    @instructor2 = @directory['person4']['id']
     @password1 = @directory['person4']['password']
-    # Test site
-    @site_name = @directory['site1']['name']
-    @site_id = @directory['site1']['id']
-    
-    # Test case variables
-    @assignments = [
-      {:title=>random_string, :grade_scale=>"Letter grade", :instructions=>random_multiline(500, 10, :string), :open_date=>yesterday },
-      {:title=>random_nicelink(15), :open_hour=>current_hour, :open_meridian=>"AM", :student_submissions=>"Inline only", :grade_scale=>"Letter grade", :instructions=>random_multiline(750, 13, :string) },
-      {:title=>random_xss_string(30), :open_hour=>next_hour, :student_submissions=>"Attachments only", :grade_scale=>"Points", :max_points=>"100", :instructions=>random_multiline(600, 12, :string) },
-      {:title=>random_string(25), :open_day=>yesterday, :grade_scale=>"Pass", :instructions=>random_multiline(800, 15, :string)  },
-      {:title=>random_string(30), :open_day=>yesterday, :grade_scale=>"Checkmark", :instructions=>random_multiline(500, 20) }
-    ]
-    
-    # Validation text -- These contain page content that will be used for
-    # test asserts.
-    @revising_alert = "Alert: You are revising an assignment after the open date."
-    @missing_instructions = "Alert: This assignment has no instructions. Please make a correction or click the original button to proceed."
-    
+
+    @sakai.page.login(@instructor1, @ipassword)
+
+    @site = make SiteObject
+    @site.create
+
+    @site.add_official_participants :role=>"Student", :participants=>[@student]
+    @site.add_official_participants :role=>"Instructor", :participants=>[@instructor2]
+
+    @assignment1 = make AssignmentObject, :site=>@site.name, :title=>random_string, :grade_scale=>"Letter grade", :instructions=>random_multiline(500, 10, :string), :open=>minutes_ago(5)
+    @assignment2 = make AssignmentObject, :allow_resubmission=>:set, :add_due_date=>:set, :site=>@site.name, :title=>random_nicelink(15), :open=>hours_ago(5), :student_submissions=>"Inline only", :grade_scale=>"Letter grade", :instructions=>random_multiline(750, 13, :string)
+    @assignment3 = make AssignmentObject, :site=>@site.name, :title=>random_xss_string(30), :open=>in_an_hour, :student_submissions=>"Attachments only", :grade_scale=>"Points", :max_points=>"100", :instructions=>random_multiline(600, 12, :string)
+    @assignment4 = make AssignmentObject, :site=>@site.name, :title=>random_string(25), :open=>an_hour_ago, :grade_scale=>"Pass", :instructions=>random_multiline(800, 15, :string)
+    @assignment5 = make AssignmentObject, :site=>@site.name, :title=>random_string(30), :open=>an_hour_ago, :grade_scale=>"Checkmark", :instructions=>random_multiline(500, 20)
+
+    @assignment1.create
+    @assignment2.create
+    @assignment3.create
+    @assignment4.create
+    @assignment5.create
+
   end
-  
-  def teardown
-    
-    @directory["site1"]["assignment1"] = @assignments[0][:title]
-    @directory["site1"]["assignment2"] = @assignments[1][:title]
-    @directory["site1"]["assignment3"] = @assignments[2][:title]
-    @directory["site1"]["assignment4"] = @assignments[3][:title]
-    @directory["site1"]["assignment5"] = @assignments[4][:title]
-    
-    # Save new assignment info for later scripts to use
-    File.open("directory.yml", "w+") { |out|
-      YAML::dump(@directory, out)
-    }
+=begin
+  after :all do
     # Close the browser window
-    @browser.close
+    @sakai.browser.close
   end
-  
-  def test_assignments_creation
-    
-    # Log in to Sakai
-    my_workspace = @sakai.page.login(@user_name, @password)
+=end
+  it "does a whole bunch of shtuff" do
 
-    # Go to test site.
-    home = my_workspace.open_my_site_by_id(@site_id)
 
-    # Go to assignments page
-    assignments = home.assignments
-    
-    # Create a new assignment
-    assignment1 = assignments.add
-    
-    # Store the due date for later verification steps
-    month_due1 = assignment1.due_month_element.selected_options[0]
-    day_due1 = assignment1.due_day_element.selected_options[0]
-    year_due1 = assignment1.due_year_element.selected_options[0]
-    
-    assignment1.title=@assignments[0][:title]
-    
-    # Try to post it
-    assignment1.post
-    
-    # TEST CASE: Alert appears when submitting without instructions
-    assert_equal(assignment1.alert_text, "Alert: This assignment has no instructions. Please make a correction or click the original button to proceed.")
-
-    # Set the open date day to yesterday
-    assignment1.open_day=@assignments[0][:open_date]
-    
-    # Set the open month to last month if today is the first
-    if (Time.now - (3600*24)).strftime("%d").to_i > (Time.now).strftime("%d").to_i
-      assignment1.open_month=last_month
-    end
-
-    # Click post again
-    assignments = assignment1.post
-    
-    #===========
-    # Add a test for trying to save without a title (but with instructions)
-    #===========
-    
-    # TEST CASE: Assignment saves this time
-    assert assignments.view_element.exists?
-    assert assignments.assignments_list.include?(@assignments[0][:title])
-    
-    # Create a New Assignment
-    assignments.add
-    
-    assignment2 = AssignmentAdd.new(@browser)
-    
-    assignment2.title=@assignments[1][:title]
-
-    # Set Open Date
-    assignment2.open_hour=@assignments[1][:open_hour]
-    assignment2.open_meridian=@assignments[1][:open_meridian]
-
-    # Store the due date for later verification steps
-    month_due2 = assignment2.due_month_element.selected_options[0]
-    day_due2 = assignment2.due_day_element.selected_options[0]
-    year_due2 = assignment2.due_year_element.selected_options[0]
-    
-    # Set inline submission only
-    assignment2.student_submissions=@assignments[1][:student_submissions]
-    
-    # Set Letter Grade
-    assignment2.grade_scale=@assignments[1][:grade_scale]
-    
     # Set allow resubmission
     assignment2.check_allow_resubmission
     

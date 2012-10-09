@@ -114,6 +114,7 @@ describe "Duplicate Site" do
     @source_site_string << "<br />\nTopic link: <a href=\"#{@topic.direct_link}\">#{@topic.title}</a><br />\n"
 
     @event = make EventObject, :site=>@site1.name, :message=>@source_site_string
+    @event.create
 
     @forum.edit :description=>@source_site_string
 
@@ -135,12 +136,12 @@ describe "Duplicate Site" do
     @new_assignment.get_info
 
   end
-
+=begin
   after :all do
     # Close the browser window
     @browser.close
   end
-
+=end
   def check_this_stuff(thing)
     thing.should match /Site ID: #{@site2.id}/
     thing.should match /\(y\) <a href..#{@new_assignment.direct_url}/
