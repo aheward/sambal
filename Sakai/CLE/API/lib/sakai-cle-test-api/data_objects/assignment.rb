@@ -7,12 +7,8 @@ class AssignmentObject
   include Workflows
 
   attr_accessor :title, :site, :instructions, :id, :link, :status, :grade_scale,
-                :max_points, :allow_resubmission, :num_resubmissions,
-                :open,
-                :due,
-                :accept_until,
-                :student_submissions,
-                :resubmission,
+                :max_points, :allow_resubmission, :num_resubmissions, :open,
+                :due, :accept_until, :student_submissions, :resubmission,
                 :add_due_date,
                 # Note the following variables are taken from the Entity picker's
                 # Item Info list
@@ -24,7 +20,11 @@ class AssignmentObject
 
     defaults = {
         :title=>random_alphanums,
-        :instructions=>random_multiline(250, 10, :string)
+        :instructions=>random_multiline(250, 10, :string),
+        :resubmission=>{},
+        :open=>{},
+        :due=>{},
+        :accept_until=>{}
     }
     options = defaults.merge(opts)
 
@@ -57,31 +57,47 @@ class AssignmentObject
       list.add
     end
     on_page AssignmentAdd do |add|
+      @allow_resubmission==nil ? @allow_resubmission=checkbox_setting(add.allow_resubmission) : add.allow_resubmission.send(@allow_resubmission)
+      if @allow_resubmission==:set
+        add.num_resubmissions.wait_until_present
+        @num_resubmissions==nil ? @num_resubmissions=add.num_resubmissions.selected_options[0].text : add.num_resubmissions.select(@num_resubmissions)
+        @resubmission[:MON]==nil ? @resubmission[:MON]=add.resub_until_month.selected_options[0].text : add.resub_until_month.select(@resubmission[:MON])
+        @resubmission[:day_of_month]==nil ? @resubmission[:day_of_month]=add.resub_until_day.selected_options[0].text : add.select(@resubmission[:day_of_month])
+        @resubmission[:year]==nil ? @resubmission[:year]=add.resub_until_year.selected_options[0].text : add.select(@resubmission[:year])
+        @resubmission[:hour]==nil ? @resubmission[:hour]=add.resub_until_hour.selected_options[0].text : add.select(@resubmission[:hour])
+        @resubmission[:minute_rounded]==nil ? @resubmission[:minute_rounded]=add.resub_until_minute.selected_options[0].text : add.select(@resubmission[:minute_rounded])
+        @resubmission[:MERIDIAN]==nil ? @resubmission[:MERIDIAN]=add.resub_until_meridian.selected_options[0].text : add.select(@resubmission[:MERIDIAN])
+      end
       add.title.set @title
       add.instructions=@instructions
-      @grade_scale==nil ? @grade_scale=add.grade_scale.value : add.grade_scale.select(@grade_scale)
-      @open[:MON]==nil ? @open[:MON]=add.open_month.value : add.open_month.select(@open[:MON])
+      @student_submissions==nil ? @student_submissions=add.student_submissions.selected_options[0].text : add.student_submissions.select(@student_submissions)
+      @grade_scale==nil ? @grade_scale=add.grade_scale.selected_options[0].text : add.grade_scale.select(@grade_scale)
+      @open[:MON]==nil ? @open[:MON]=add.open_month.selected_options[0].text : add.open_month.select(@open[:MON])
       add.max_points.set(@max_points) unless @max_points==nil
-      @open[:year]==nil ? @open[:year]=add.open_year.value : add.open_year.select(@open[:year])
-      @open[:day_of_month]==nil ? @open[:day_of_month]=add.open_day.value : add.open_day.select(@open[:day_of_month])
-      @open[:hour]==nil ? @open[:hour]=add.open_hour.value : add.open_hour.select(@open[:hour])
-      @open[:minute]==nil ? @open[:minute]=add.open_minute.value : add.open_minute.select(@open[:minute])
-      @open[:MERIDIAN]==nil ? @open[:MERIDIAN]=add.open_meridian.value : add.open_meridian.select(@open[:MERIDIAN])
-      @allow_resubmission==nil ? @allow_resubmission=checkbox_setting(add.allow_resubmission) : add.allow_resubmission.send(@allow_resubmission)
+      @open[:year]==nil ? @open[:year]=add.open_year.selected_options[0].text : add.open_year.select(@open[:year])
+      @open[:day_of_month]==nil ? @open[:day_of_month]=add.open_day.selected_options[0].text : add.open_day.select(@open[:day_of_month])
+      @open[:hour]==nil ? @open[:hour]=add.open_hour.selected_options[0].text : add.open_hour.select(@open[:hour])
+      @open[:minute_rounded]==nil ? @open[:minute_rounded]=add.open_minute.selected_options[0].text : add.open_minute.select(@open[:minute_rounded])
+      @open[:MERIDIAN]==nil ? @open[:MERIDIAN]=add.open_meridian.selected_options[0].text : add.open_meridian.select(@open[:MERIDIAN])
       @add_due_date==nil ? @add_due_date=checkbox_setting(add.add_due_date) : add.add_due_date.send(@add_due_date)
-      # TODO: Add Due and Accept dates here
-      if @allow_resubmission==:set
-        @num_resubmissions==nil ? @num_resubmissions=add.num_resubmissions.value : add.num_resubmissions.select(@num_resubmissions)
-        @student_submissions==nil ? @student_submissions=add.student_submissions.value : add.student_submissions.select(@student_submissions)
-        @resubmission[:MON]==nil ? @resubmission[:MON]=add.resub_until_month.value : add.resub_until_month.select(@resubmission[:MON])
-        @resubmission[:day_of_month]==nil ? @resubmission[:day_of_month]=add.resub_until_day.value : add.select(@resubmission[:day_of_month])
-        @resubmission[:year]==nil ? @resubmission[:year]=add.resub_until_year.value : add.select(@resubmission[:year])
-        @resubmission[:hour]==nil ? @resubmission[:hour]=add.resub_until_hour.value : add.select(@resubmission[:hour])
-        @resubmission[:minute]==nil ? @resubmission[:minute]=add.resub_until_minute.value : add.select(@resubmission[:minute])
-        @resubmission[:MERIDIAN]==nil ? @resubmission[:MERIDIAN]=add.resub_until_meridian.value : add.select(@resubmission[:MERIDIAN])
-      end
+      @due[:MON]==nil ? @due[:MON]=add.due_month.selected_options[0].text : add.due_month.select(@due[:MON])
+      @due[:year]==nil ? @due[:year]=add.due_year.selected_options[0].text : add.due_year.select(@due[:year])
+      @due[:day_of_month]==nil ? @due[:day_of_month]=add.due_day.selected_options[0].text : add.due_day.select(@due[:day_of_month])
+      @due[:hour]==nil ? @due[:hour]=add.due_hour.selected_options[0].text : add.due_hour.select(@due[:hour])
+      @due[:minute_rounded]==nil ? @due[:minute_rounded]=add.due_minute.selected_options[0].text : add.due_minute.select(@due[:minute_rounded])
+      @due[:MERIDIAN]==nil ? @due[:MERIDIAN]=add.due_meridian.selected_options[0].text : add.due_meridian.select(@due[:MERIDIAN])
+      @accept_until[:MON]==nil ? @accept_until[:MON]=add.accept_month.selected_options[0].text : add.accept_month.select(@accept_until[:MON])
+      @accept_until[:year]==nil ? @accept_until[:year]=add.accept_year.selected_options[0].text : add.accept_year.select(@accept_until[:year])
+      @accept_until[:day_of_month]==nil ? @accept_until[:day_of_month]=add.accept_day.selected_options[0].text : add.accept_day.select(@accept_until[:day_of_month])
+      @accept_until[:hour]==nil ? @accept_until[:hour]=add.accept_hour.selected_options[0].text : add.accept_hour.select(@accept_until[:hour])
+      @accept_until[:minute_rounded]==nil ? @accept_until[:minute_rounded]=add.accept_minute.selected_options[0].text : add.accept_minute.select(@accept_until[:minute_rounded])
+      @accept_until[:MERIDIAN]==nil ? @accept_until[:MERIDIAN]=add.accept_meridian.selected_options[0].text : add.accept_meridian.select(@accept_until[:MERIDIAN])
       #@do_not_add_to_gradebook==nil ? @do_not_add_to_gradebook=radio_setting(add.do_not_add_gradebook.set?) :
-      add.post
+      if @status=="Draft"
+        add.save_draft
+      else
+        add.post
+      end
     end
     on_page AssignmentsList do |list|
       @id = list.get_assignment_id @title

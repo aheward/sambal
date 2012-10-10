@@ -29,7 +29,7 @@ class Calendar < CalendarBase
   menu_elements
 
   # Selects the specified item in the View select list.
-  element(:view) { |b| b.frm.select(:id=>"view").select(item) }
+  element(:view) { |b| b.frm.select(:id=>"view") }
 
   # Selects the specified item in the Show select list.
   element(:show) { |b| b.frm.select(:id=>"timeFilterOption") }

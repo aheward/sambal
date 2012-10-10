@@ -46,6 +46,7 @@ describe "Assignments" do
     @assignment4.create
     @assignment5.create
 
+    exit
   end
 =begin
   after :all do
@@ -55,18 +56,6 @@ describe "Assignments" do
 =end
   it "does a whole bunch of shtuff" do
 
-
-    # Set allow resubmission
-    assignment2.check_allow_resubmission
-    
-    # Enter assignment instructions into the rich text editor
-    assignment2.instructions=@assignments[1][:instructions]
-     
-    # Add due date to schedule
-    assignment2.check_add_due_date
-    
-    # Save
-    assignments = assignment2.post
     
     # TEST CASE: Verify save
     assert assignments.assignment_titles.include? @assignments[1][:title]
@@ -75,9 +64,9 @@ describe "Assignments" do
     calendar = assignments.calendar
     
     # List events on the expected due date for Assignment 2
-    calendar.view="List of Events"
-    calendar.show_events="Custom date range"
-    calendar.start_month=month_due2
+    calendar.view.select "List of Events"
+    calendar.show_events.select "Custom date range"
+    calendar.start_month.select month_due2
     calendar.start_day=day_due2
     calendar.start_year=year_due2
     calendar.end_month=month_due2

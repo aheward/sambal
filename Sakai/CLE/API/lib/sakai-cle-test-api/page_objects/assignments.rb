@@ -100,13 +100,13 @@ class AssignmentAdd < AssignmentsBase
   element(:student_submissions) { |b| b.frm.select(:id=>"subType") }
   element(:grade_scale) { |b| b.frm.select(:id=>"new_assignment_grade_type") }
   element(:allow_resubmission) { |b| b.frm.checkbox(:id=>"allowResToggle") }
-  element(:num_resubmissions) { |b| b.frm.select(:id=>"allowResubmitNumber") }
-  element(:resub_until_month) { |b| b.frm.select(:id=>"allow_resubmit_closeMonth") }
-  element(:resub_until_day) { |b| b.frm.select(:id=>"allow_resubmit_closeDay") }
-  element(:resub_until_year) { |b| b.frm.select(:id=>"allow_resubmit_closeYear") }
-  element(:resub_until_hour) { |b| b.frm.select(:id=>"allow_resubmit_closeHour") }
-  element(:resub_until_minute) { |b| b.frm.select(:id=>"allow_resubmit_closeMin") }
-  element(:resub_until_meridian) { |b| b.frm.select(:id=>"allow_resubmit_closeAMPM") }
+  element(:num_resubmissions) { |b| b.frm.form(:name=>"newAssignmentForm").select(:id=>"allowResubmitNumber") }
+  element(:resub_until_month) { |b| b.frm.form(:name=>"newAssignmentForm").select(:id=>"allow_resubmit_closeMonth") }
+  element(:resub_until_day) { |b| b.frm.form(:name=>"newAssignmentForm").select(:id=>"allow_resubmit_closeDay") }
+  element(:resub_until_year) { |b| b.frm.form(:name=>"newAssignmentForm").select(:id=>"allow_resubmit_closeYear") }
+  element(:resub_until_hour) { |b| b.frm.form(:name=>"newAssignmentForm").select(:id=>"allow_resubmit_closeHour") }
+  element(:resub_until_minute) { |b| b.frm.form(:name=>"newAssignmentForm").select(:id=>"allow_resubmit_closeMin") }
+  element(:resub_until_meridian) { |b| b.frm.form(:name=>"newAssignmentForm").select(:id=>"allow_resubmit_closeAMPM") }
   element(:max_points) { |b| b.frm.text_field(:name=>"new_assignment_grade_points") }
   element(:add_due_date) { |b| b.frm.checkbox(:id=>"new_assignment_check_add_due_date") }
   element(:add_open_announcement) { |b| b.frm.checkbox(:id=>"new_assignment_check_auto_announce") }

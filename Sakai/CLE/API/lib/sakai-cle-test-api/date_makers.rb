@@ -108,18 +108,19 @@ module DateMakers
   def date_factory(time_object)
     {
         :sakai=>make_date(time_object),
-        :MON => time_object.strftime("%^b"),
-        :Mon => time_object.strftime("%b"),
-        :Month => time_object.strftime("%B"),
-        :month_int => time_object.month,
-        :day_of_month => time_object.day,
-        :weekday => time_object.strftime("%A"),
-        :wkdy => time_object.strftime("%a"),
-        :year => time_object.year,
-        :hour => time_object.strftime("%I").to_i,
-        :minute => time_object.min,
-        :meridian => time_object.strftime("%P"),
-        :MERIDIAN => time_object.strftime("%p")
+        :MON => time_object.strftime("%^b"), # => "DEC"
+        :Mon => time_object.strftime("%b"), # => "Jan"
+        :Month => time_object.strftime("%B"), # => "February"
+        :month_int => time_object.month, # => 3
+        :day_of_month => time_object.day, # => 17 Note this is not zero-padded
+        :weekday => time_object.strftime("%A"), # => "Monday"
+        :wkdy => time_object.strftime("%a"), # => "Tue"
+        :year => time_object.year, # => 2013
+        :hour => time_object.strftime("%I").to_i, # => "07" Zero-padded, 12-hour clock
+        :minute => (time_object).strftime("%M"), # => "02" Zero-padded
+        :minute_rounded => (Time.at(time_object.to_i/(5*60)*(5*60))).strftime("%M"), # => "05" Zero-padded, rounded to 5-minute increments
+        :meridian => time_object.strftime("%P"), # => "pm"
+        :MERIDIAN => time_object.strftime("%p") # => "AM"
     }
   end
 
