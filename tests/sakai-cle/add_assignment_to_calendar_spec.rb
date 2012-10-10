@@ -2,7 +2,7 @@ require 'rspec'
 require 'sakai-cle-test-api'
 require 'yaml'
 
-describe "Assignments" do
+describe "Assignment Due Date on Calendar" do
 
   include Utilities
   include Workflows
@@ -41,12 +41,12 @@ describe "Assignments" do
     @assignment2.create
 
   end
-=begin
+
   after :all do
     # Close the browser window
     @sakai.browser.close
   end
-=end
+
   it "When 'add due date to schedule' not checked, Assignment does not appear on the Calendar" do
     calendar
 
@@ -80,4 +80,7 @@ describe "Assignments" do
 
     end
   end
+
+  # TODO: Add tests for student and other instructor being able to see the assignment in the calendar
+
 end

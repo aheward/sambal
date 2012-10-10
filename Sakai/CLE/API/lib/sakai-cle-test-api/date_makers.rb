@@ -2,33 +2,25 @@
 module DateMakers
 
   MONTHS = %w{JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC}
-  # Returns the value of the last hour as an Integer object, which
-  # eliminates the zero-padding for single-digit hours. 12-hour clock.
   def an_hour_ago
     date_factory(Time.now - 3600)
   end
   alias last_hour an_hour_ago
 
-  # Returns the value of the current hour as an Integer object, which
-  # eliminates the zero-padding for single-digit hours. 12-hour clock.
   def right_now
     date_factory(Time.now)
   end
 
-  # Returns the value of the next hour as an Integer object, which
-  # eliminates the zero-padding for single-digit hours. 12-hour clock.
   def in_an_hour
     date_factory(Time.now + 3600)
   end
   alias next_hour in_an_hour
 
-  # Returns a 4-digit Integer object, equal to last year.
   def last_year
     date_factory(Time.now - (3600*24*365))
   end
   alias a_year_ago last_year
 
-  # Returns an all-caps 3-char string equal to the prior month
   def last_month
     index = MONTHS.index(current_month)
     return MONTHS[index-1]
@@ -50,12 +42,10 @@ module DateMakers
     date_factory(Time.now + num*60)
   end
 
-  # Returns an all-caps 3-char string equal to the current month
   def current_month
     Time.now.strftime("%^b")
   end
 
-  # Returns an all-caps 3-char string equal to next month
   def next_month
     index = MONTHS.index(current_month)
     if index < 11
@@ -65,21 +55,14 @@ module DateMakers
     end
   end
 
-  # Returns a 4-digit Integer object equal to next year.
   def in_a_year
     date_factory(Time.now + (3600*24*365))
   end
 
-  # Returns an Integer object equal to
-  # yesterday's day of the month. The string is converted to
-  # an integer so as to remove the zero-padding from single-digit day values.
   def yesterday
     date_factory(Time.now - (3600*24))
   end
 
-  # Returns an Integer object equal to
-  # tomorrow's day of the month. The string is converted to
-  # an integer so as to remove the zero-padding from single-digit day values.
   def tomorrow
     date_factory(Time.now + (3600*24))
   end
@@ -105,6 +88,8 @@ module DateMakers
     return month + day.to_s + year + hour.to_s + mins
   end
 
+  # Takes a time object and returns a hash containing
+  # various parts of the relevant date.
   def date_factory(time_object)
     {
         :sakai=>make_date(time_object),
