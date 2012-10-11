@@ -124,7 +124,11 @@ class AssignmentObject
       unless opts[:instructions] == nil
         edit.enter_source_text edit.editor, opts[:instructions]
       end
-      edit.post
+      if (@status=="Draft" && opts[:status]==nil) || opts[:status]=="Draft"
+        edit.save_draft
+      else
+        edit.post
+      end
     end
     @title=opts[:title] unless opts[:title] == nil
     @instructions=opts[:instructions] unless opts[:instructions] == nil
@@ -149,7 +153,7 @@ class AssignmentObject
       end
     end
 
-    # TODO: Need to add more stuff here as needed...
+    # TODO: Add more stuff here as needed...
 
     on AssignmentAdd do |edit|
 
@@ -172,6 +176,14 @@ class AssignmentObject
     on AssignmentAdd do |edit|
       edit.cancel
     end
+  end
+
+  def submit
+    # TODO: Create this method
+  end
+
+  def grade
+    # TODO: Create this method
   end
 
 end
