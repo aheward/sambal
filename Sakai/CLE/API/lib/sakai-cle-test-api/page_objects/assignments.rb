@@ -116,7 +116,7 @@ class AssignmentAdd < AssignmentsBase
   element(:allow_students_to_view_report) { |b| b.frm.checkbox(:id=>"new_assignment_allow_student_view") }
 
   element(:do_not_add_to_gradebook) { |b| b.frm.radio(:id=>"no",:name=>"new_assignment_add_to_gradebook") }
-  element(:add_to_gradebook) { |b| b.frm.radio(:name=>"new_assignment_add_to_gradebook") }
+  element(:add_to_gradebook) { |b| b.frm.radio(:id=>"add", :name=>"new_assignment_add_to_gradebook") }
   element(:do_not_send_notifications) { |b| b.frm.radio(:id=>"notsendnotif") }
   element(:send_notifications) { |b| b.frm.radio(:id=>"sendnotif") }
   element(:send_summary_email) { |b| b.frm.radio(:id=>"sendnotifsummary") }

@@ -9,7 +9,7 @@ class AssignmentObject
   attr_accessor :title, :site, :instructions, :id, :link, :status, :grade_scale,
                 :max_points, :allow_resubmission, :num_resubmissions, :open,
                 :due, :accept_until, :student_submissions, :resubmission,
-                :add_due_date, :add_open_announcement,
+                :add_due_date, :add_open_announcement, :add_to_gradebook,
                 # Note the following variables are taken from the Entity picker's
                 # Item Info list
                 :retract_time, :time_due, :time_modified, :url, :portal_url,
@@ -42,6 +42,7 @@ class AssignmentObject
     @student_submissions=options[:student_submissions]
     @add_due_date=options[:add_due_date]
     @add_open_announcement=options[:add_open_announcement]
+    @add_to_gradebook=options[:add_to_gradebook]
     @status=options[:status]
     raise "You must specify a Site for your Assignment" if @site==nil
     raise "You must specify max points if your grade scale is 'points'" if @max_points==nil && @grade_scale=="Points"
@@ -83,6 +84,7 @@ class AssignmentObject
       @open[:MERIDIAN]==nil ? @open[:MERIDIAN]=add.open_meridian.selected_options[0].text : add.open_meridian.select(@open[:MERIDIAN])
       @add_due_date==nil ? @add_due_date=checkbox_setting(add.add_due_date) : add.add_due_date.send(@add_due_date)
       @add_open_announcement==nil ? @add_open_announcement=checkbox_setting(add.add_open_announcement) : add.add_open_announcement.send(@add_open_announcement)
+      @add_to_gradebook==nil ? @add_to_gradebook=radio_setting(add.add_to_gradebook) : add.add_to_gradebook.send(@add_to_gradebook)
       @due[:MON]==nil ? @due[:MON]=add.due_month.selected_options[0].text : add.due_month.select(@due[:MON])
       @due[:year]==nil ? @due[:year]=add.due_year.selected_options[0].text : add.due_year.select(@due[:year])
       @due[:day_of_month]==nil ? @due[:day_of_month]=add.due_day.selected_options[0].text : add.due_day.select(@due[:day_of_month])
@@ -120,22 +122,36 @@ class AssignmentObject
       end
     end
     on AssignmentAdd do |edit|
-      edit.title.set opts[:title] unless opts[:title] == nil
-      unless opts[:instructions] == nil
+      edit.title.set opts[:title] unless opts[:title]==nil
+      unless opts[:instructions]==nil
         edit.enter_source_text edit.editor, opts[:instructions]
       end
+      edit.grade_scale.select opts[:grade_scale] unless opts[:grade_scale]==nil
+      edit.max_points.set opts[:max_points] unless opts[:max_points]==nil
+      # This should be one of the last items edited...
+      edit.add_to_gradebook.send(opts[:add_to_gradebook]) unless opts[:add_to_gradebook]==nil
+
+      #TODO: All the rest goes here
+
       if (@status=="Draft" && opts[:status]==nil) || opts[:status]=="Draft"
         edit.save_draft
+      elsif opts[:status]=="Editing"
+        # Stay on the page
       else
         edit.post
       end
     end
     @title=opts[:title] unless opts[:title] == nil
     @instructions=opts[:instructions] unless opts[:instructions] == nil
+    @grade_scale=opts[:grade_scale] unless opts[:grade_scale] == nil
     @max_points=opts[:max_points] unless opts[:title] == nil
+    @add_to_gradebook==opts[:add_to_gradebook]
     # TODO: Add all the rest of the elements here
-    on AssignmentsList do |list|
-      @status=list.status_of @title
+
+    unless opts[:status]=="Editing"
+      on AssignmentsList do |list|
+        @status=list.status_of @title
+      end
     end
   end
 

@@ -70,9 +70,14 @@ module DateMakers
   def in_a_week
     date_factory(Time.now + (3600*24*7))
   end
+  alias next_week in_a_week
 
   def a_week_ago
     date_factory(Time.now - (3600*24*7))
+  end
+
+  def next_monday
+    date_factory(Time.at(Time.now+(8-Time.now.wday)*24*3600))
   end
 
   # Formats a date string Sakai-style.
@@ -81,11 +86,11 @@ module DateMakers
   # Supplied variable must be of of the Time class.
   def make_date(time_object)
     month = time_object.strftime("%b ")
-    day = time_object.strftime("%d").to_i
+    day = time_object.strftime("%-d")
     year = time_object.strftime(", %Y ")
     mins = time_object.strftime(":%M %P")
     hour = time_object.strftime("%l").to_i
-    return month + day.to_s + year + hour.to_s + mins
+    return month + day + year + hour.to_s + mins
   end
 
   # Takes a time object and returns a hash containing
@@ -93,6 +98,7 @@ module DateMakers
   def date_factory(time_object)
     {
         :sakai=>make_date(time_object),
+        :short_date=>time_object.strftime("%b %-d, %Y"), # => "Oct 18, 2013"
         :MON => time_object.strftime("%^b"), # => "DEC"
         :Mon => time_object.strftime("%b"), # => "Jan"
         :Month => time_object.strftime("%B"), # => "February"
