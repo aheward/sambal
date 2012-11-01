@@ -10,9 +10,10 @@ class ManageCourseOfferings < BasePage
   element(:subject_code) { |b| b.frm.radio(value: "subjectCode") }
   element(:input_code) { |b| b.frm.text_field(name: "inputCode") }
 
-  action(:manage_registration_groups) { |b| b.frm.link(id: "u156").click; b.loading.wait_while_present } # Persistent ID needed!
+  element(:manage_offering_links_div) { |b| b.frm.div(id: "KS-CourseOfferingManagement-CourseOfferingLinks")}
+  action(:manage_registration_groups) { |b| b.manage_offering_links_div.link(text: "Manage Registration Groups").click; b.loading.wait_while_present } # Persistent ID needed!
 
-  action(:show) { |b| b.frm.button(text: "Show").click; b.loading.wait_while_present } # Persistent ID needed!
+  action(:show) { |b| b.frm.button(text: "Show").click; sleep 2; b.loading.wait_while_present } # Persistent ID needed!
 
   value(:course_title) { |b| b.frm.div(id: "KS-CourseOfferingManagement-ActivityOfferingResultSection").h3(index: 0).text }
   action(:edit_offering) { |b| b.frm.link(id: "u327").click; b.loading.wait_while_present } # Persistent ID needed!

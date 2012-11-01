@@ -7,15 +7,8 @@ class ActivityOffering
                 :format,
                 :activity_type,
                 :max_enrollment,
-                #:req_delivery_logistics,
-                :logistics_days,
-                :logistics_starttime,
-                :logistics_starttime_ampm,
-                :logistics_endtime,
-                :logistics_endtime_ampm,
-                :logistics_facility,
-                :logistics_room,
-                :needed_features_list,
+                :actual_delivery_logistics_list,
+                :requested_delivery_logistics_list,
                 :personnel_list,
                 :seat_pool_list,
                 :seat_remaining_percent,
@@ -23,50 +16,37 @@ class ActivityOffering
                 :evaluation,
                 :honors_course
 
-  def initialize(browser, code, opts={})
+  def initialize(browser, code)
     @browser = browser
+    @seat_pool_list = {}
+    @actual_delivery_logistics_list = {}
+    @requested_delivery_logistics_list = {}
+
+  end
+
+  def create(opts = {})
+
+    default_seat_pool_hash = {"random"=> (make SeatPool)}
+    default_rdl_hash = {"default"=> (make DeliveryLogistics)}
 
     defaults = {
         :format => "Lecture",
         :activity_type => "Lecture",
         :max_enrollment => 100,
-        :logistics_days => "MWF",
-        :logistics_starttime => "10:00",
-        :logistics_starttime_ampm => "am",
-        :logistics_endtime => "11:00",
-        :logistics_endtime_ampm => "am",
-        :logistics_facility => "097",
-        :logistics_room => "1115097",
-        :needed_features_list => [],
+        :actual_delivery_logistics_list => {},
+        :requested_delivery_logistics_list => default_rdl_hash,
         :personnel_list => Array.new(1){make Personnel} ,
-        :seat_pool_list => Array.new(1){make SeatPool},
+        :seat_pool_list => default_seat_pool_hash,
+        #:seat_pool_list => Array.new(1){make SeatPool},
         :course_url => "www.test_course.com",
         :evaluation => true,
         :honors_course => true
     }
     options = defaults.merge(opts)
 
-    @code=code
-    @format=options[:format]
-    @activity_type=options[:activity_type]
-    @max_enrollment=options[:max_enrollment]
-    #:req_delivery_logistics
-    @logistics_days=options[:logistics_days]
-    @logistics_starttime=options[:logistics_starttime]
-    @logistics_starttime_ampm=options[:logistics_starttime_ampm]
-    @logistics_endtime=options[:logistics_endtime]
-    @logistics_endtime_ampm=options[:logistics_endtime_ampm]
-    @logistics_facility=options[:logistics_facility]
-    @logistics_room=options[:logistics_room]
-    @needed_features_list=options[:needed_features_list]
-    @personnel_list=options[:personnel_list]
-    @seat_pool_list=options[:seat_pool_list]
-    @course_url=options[:course_url]
-    @evaluation=options[:evaluation]
-    @honors_course=options[:honors_course]
-  end
+    @format = options[:format]
+    @activity_type = options[:activity_type]
 
-  def create()
     on ManageCourseOfferings do |page|
       #if page.codes_list.length == 0
       sleep 2
@@ -79,47 +59,111 @@ class ActivityOffering
       #end
       @code = page.codes_list[0]
     end
-  end
 
-
-  def edit()
     on ManageCourseOfferings do |page|
       page.edit @code
     end
+
+    edit(options)
+  end
+
+
+  def edit opts={}
+
+    defaults = {
+        :max_enrollment => @max_enrollment,
+        :actual_delivery_logistics_list => @actual_delivery_logistics_list,
+        :requested_delivery_logistics_list => @requested_delivery_logistics_list,
+        :personnel_list => @personnel_list ,
+        :seat_pool_list => @seat_pool_list,
+        :course_url => @course_url,
+        :evaluation => @evaluation,
+        :honors_course => @honors_course
+    }
+
+    options=defaults.merge(opts)
+
+    if options[:max_enrollment] != @max_enrollment
+      on ActivityOfferingMaintenance do |page|
+        page.total_maximum_enrollment.set options[:max_enrollment]
+        page.total_maximum_enrollment.fire_event "onchange"
+        @max_enrollment = options[:max_enrollment]
+      end
+    end
+
+    #TODO: comparison could be more robust
+    if options[:requested_delivery_logistics_list].keys != @requested_delivery_logistics_list.keys
+      if options[:requested_delivery_logistics_list].length > 0
+        on ActivityOfferingMaintenance do |page|
+          page.revise_logistics
+        end
+        #'save' vs 'save and process' determined by first rdl
+        first_rdl = options[:requested_delivery_logistics_list].values[0]
+        #list of requests added with updated keys
+        requests_added = {}
+
+        options[:requested_delivery_logistics_list].values.each do |request|
+          request.add_logistics_request()
+          requests_added["#{request.days}#{request.start_time}#{request.start_time_ampm.upcase}".delete(' ')] = request
+        end
+
+        if first_rdl.process
+          @actual_delivery_logistics_list.merge!(requests_added)
+          first_rdl.save_and_process()
+        else
+          @requested_delivery_logistics_list.merge(requests_added)
+          first_rdl.save()
+        end
+        puts "adl keys: #{@actual_delivery_logistics_list.keys}"
+
+      end
+    end
+
     on ActivityOfferingMaintenance do |page|
-      page.total_maximum_enrollment.set @max_enrollment
-      page.days.set @logistics_days
-      page.start_time.set @logistics_starttime
-      page.start_time_ampm.select @logistics_starttime_ampm
-      page.end_time.set @logistics_endtime
-      page.end_time_ampm.select @logistics_endtime_ampm
-      page.facility.set @logistics_facility
-      page.room.set @logistics_room
-
-      page.course_url.set @course_url
-      if @evaluation
-        page.requires_evaluation.set
-      else
-        page.requires_evaluation.clear
+      if options[:course_url] != @course_url
+        page.course_url.set options[:course_url]
+        @course_url = options[:course_url]
       end
 
-      if @honors_course
-        page.honors_flag.set
-      else
-        page.honors_flag.clear
+      if options[:evaluation] != @evaluation
+        if options[:evaluation]
+          page.requires_evaluation.set
+        else
+          page.requires_evaluation.clear
+        end
+        @evaluation =  options[:evaluation]
       end
 
+      if options[:honors_course] != @honors_course
+        if options[:honors_course]
+          page.honors_flag.set
+        else
+          page.honors_flag.clear
+        end
+        @honors_course = options[:honors_course]
+      end
+    end
+    if options[:personnel_list] != @personnel_list
+      options[:personnel_list].each do |person|
+        person.add_personnel
+      end
+      @personnel_list = options[:personnel_list]
     end
 
-    @personnel_list.each do |person|
-      person.add_personnel
-    end
-
-    @seat_pool_list.each do |seat_pool|
-      seat_pool.add_seatpool
+    #TODO: comparison could be more robust
+    if options[:seat_pool_list].keys != @seat_pool_list.keys
+      options[:seat_pool_list].each do |key,seat_pool|
+        seat_pool.add_seatpool
+        @seat_pool_list[key] = seat_pool unless !seat_pool.exp_add_succeed?
+      end
     end
   end
 
+  def update()
+    on ActivityOfferingMaintenance do |page|
+      page.submit
+    end
+  end
 
   def save()
     on ActivityOfferingMaintenance do |page|
@@ -129,35 +173,83 @@ class ActivityOffering
 
   def seats_remaining
     seats_used = 0
-    seat_pool_list.each do |seat_pool|
-      seats_used += seat_pool.seats
+    @seat_pool_list.each do |key,seat_pool|
+      seats_used += seat_pool.seats.to_i
     end
-    @max_enrollment - seats_used
+    [@max_enrollment - seats_used , 0].max
   end
 
-  #TODO verify page elements code
-=begin
-  def verify_ao_edit_page
-    @activity_offering.seat_pool_list = []
-    seatpool = make SeatPool, :population_name => "Acad Achiev Pgm"
-    @activity_offering.seat_pool_list.push(seatpool)
-    step "I remove the seat pool with priority 1"
-
+  def remove_seatpool(seatpool_key)
     on ActivityOfferingMaintenance do |page|
-      page.update_expiration_milestone "New Transfers", "Last Day of Registration"
+      page.remove_seatpool(@seat_pool_list[seatpool_key].population_name)
     end
+    @seat_pool_list.delete(seatpool_key)
+  end
 
-
-    on ActivityOfferingMaintenance do |page|
-      puts page.get_affiliation("1101")
-      puts page.get_inst_effort("1101")
-      puts page.get_seats("Fraternity/Sorority")
-      puts page.get_expiration_milestone("Fraternity/Sorority")
-      puts page.get_priority("Fraternity/Sorority")
-      puts page.pool_percentage("Fraternity/Sorority")
+  def remove_seatpools()
+    @seat_pool_list.each do |seatpool_key|
+      if @seat_pool_list[seatpool_key].remove
+        on ActivityOfferingMaintenance do |page|
+          page.remove_seatpool(@seat_pool_list[seatpool_key].population_name)
+        end
+        @seat_pool_list.delete(seatpool_key)
+      end
     end
   end
-=end
+
+  def resequence_seatpools()
+    @seat_pool_list.values.each do |seatpool|
+      seatpool.priority = seatpool.priority_after_reseq
+    end
+  end
+
+  def edit_seatpool opts = {}
+
+    sp_key = opts[:seatpool_key]
+    sp_key = @seat_pool_list.keys[0] unless sp_key != nil
+
+    defaults = {
+        :priority => @seat_pool_list[sp_key].priority,
+        :seats => @seat_pool_list[sp_key].seats,
+        :expiration_milestone => @seat_pool_list[sp_key].expiration_milestone,
+        :remove => false,
+        :priority_after_reseq => @seat_pool_list[sp_key].priority_after_reseq
+    }
+    options=defaults.merge(opts)
+    update_pop_name = @seat_pool_list[sp_key].population_name
+
+    on ActivityOfferingMaintenance do |page|
+      page.update_seats(update_pop_name, seat_count)
+      @seat_pool_list[sp_key].seats = seat_count
+    end
+
+
+    if options[:priority] != @seat_pool_list[sp_key].priority
+      on ActivityOfferingMaintenance do |page|
+        page.update_priority(update_pop_name,options[:priority])
+        @seat_pool_list[sp_key].priority = options[:priority]
+      end
+    end
+
+    if options[:expiration_milestone] != @seat_pool_list[sp_key].expiration_milestone
+      on ActivityOfferingMaintenance do |page|
+        page.update_expiration_milestone(update_pop_name,options[:expiration_milestone])
+        @seat_pool_list[sp_key].expiration_milestone = options[:expiration_milestone]
+      end
+    end
+
+    if options[:priority_after_reseq] != @seat_pool_list[sp_key].priority_after_reseq
+      @seat_pool_list[sp_key].priority_after_reseq = options[:priority_after_reseq]
+    end
+
+    #remove has to be last...
+    if options[:remove]
+      on ActivityOfferingMaintenance do |page|
+        page.remove_seatpool(update_pop_name)
+        @seat_pool_list.delete(sp_key)
+      end
+    end
+  end
 
 end
 
@@ -172,7 +264,13 @@ class SeatPool
   attr_accessor :priority,
                 :seats,
                 :population_name,
-                :expiration_milestone
+                :expiration_milestone,
+                :remove,
+                :priority_after_reseq,
+                :exp_add_succeed
+
+  alias_method :remove?, :remove
+  alias_method :exp_add_succeed?, :exp_add_succeed
 
   def initialize(browser, opts={})
     @browser = browser
@@ -181,14 +279,15 @@ class SeatPool
         :priority => 1,
         :seats => 10,
         :population_name => "random",
-        :expiration_milestone => "First Day of Classes"
+        :expiration_milestone => "First Day of Classes",
+        :remove => false,
+        :priority_after_reseq => 0,
+        :exp_add_succeed => true
     }
     options = defaults.merge(opts)
+    options[:priority_after_reseq] = options[:priority] unless options[:priority_after_reseq] != 0
+    set_options(options)
 
-    @priority=options[:priority]
-    @seats=options[:seats]
-    @population_name = options[:population_name]
-    @expiration_milestone = options[:expiration_milestone]
   end
 
   def percent_of_total(max_enrollment)
@@ -245,10 +344,7 @@ class Personnel
         :inst_effort => 50
     }
     options = defaults.merge(opts)
-
-    @id=options[:id]
-    @affiliation=options[:affiliation]
-    @inst_effort = options[:inst_effort]
+    set_options(options)
   end
 
   def add_personnel
@@ -259,5 +355,78 @@ class Personnel
       page.add_personnel
     end
   end
+end
 
+class DeliveryLogistics
+  include PageHelper
+  include Workflows
+  include Utilities
+
+  attr_accessor :tba, #boolean
+                :days,
+                :start_time,
+                :start_time_ampm,
+                :end_time,
+                :end_time_ampm,
+                :facility,
+                :facility_long_name,
+                :room,
+                :features_list,
+                :process
+
+  alias_method :tba?, :tba
+  alias_method :process?, :process
+
+  def initialize(browser, opts={})
+    @browser = browser
+
+    defaults = {
+        :tba  => false,
+        :days  => "MWF",
+        :start_time  => "01:00",
+        :start_time_ampm  => "pm",
+        :end_time  => "02:00",
+        :end_time_ampm  => "pm",
+        :facility  => "ARM",
+        :facility_long_name  => "Reckord Armory",
+        :room  => "126",
+        :features_list  => [],
+        :process => true
+    }
+    options = defaults.merge(opts)
+    set_options(options)
+  end
+
+  def add_logistics_request
+    on DeliveryLogisticsEdit do |page|
+      if @tba
+        page.add_tba.set
+      else
+        page.add_tba.clear
+      end
+
+      page.add_days.set @days
+      page.add_start_time.set @start_time
+      page.add_start_time_ampm.select @start_time_ampm
+      page.add_end_time.set @end_time
+      page.add_end_time_ampm.select @end_time_ampm
+      page.add_facility.set @facility
+      page.add_room.set @room
+      #page.facility_features TODO: later, facility features persistence not implemented yet
+      page.add
+    end
+
+  end
+
+  def save_and_process
+    on DeliveryLogisticsEdit do |page|
+      page.save_and_process_request
+    end
+  end
+
+  def save
+    on DeliveryLogisticsEdit do |page|
+      page.save
+    end
+  end
 end

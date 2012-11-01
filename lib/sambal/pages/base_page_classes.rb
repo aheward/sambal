@@ -1,6 +1,7 @@
 class PopulationsBase < BasePage
 
   wrapper_elements
+  element(:child_populations_table) { |b| b.frm.div(id: "populations_table").table() }
 
   class << self
 
@@ -19,14 +20,20 @@ class PopulationsBase < BasePage
       element(:rule) { |b| b.frm.select(name: "document.newMaintainableObject.dataObject.populationRuleInfo.agendaIds[0]") }
       element(:child_population) { |b| b.frm.text_field(name: "newCollectionLines['document.newMaintainableObject.dataObject.childPopulations'].name") }
       element(:reference_population) { |b| b.frm.text_field(name: "document.newMaintainableObject.dataObject.referencePopulation.name") }
-      element(:populations_table) { |b| b.frm.div(id: "populations_table").table(index: 0) }
-
-      element(:child_populations_table) { |b| b.frm.table(id: "u200") }
 
       action(:lookup_population) { |b| b.frm.link(id: "lookup_searchPopulation_add").click; b.loading.wait_while_present } 
       action(:lookup_ref_population) { |b| b.frm.link(id: "lookup_searchRefPopulation").click; b.loading.wait_while_present }
-      action(:add) { |b| b.frm.div(id: "populations_table").button(text: "add").click; b.loading.wait_while_present; sleep 1.5 } #TODO - right now, this button has a different name in edit vs create screens
+      action(:add) { |b| b.child_populations_table.button(text: "add").click; b.loading.wait_while_present; sleep 1.5 }
+    end
 
+    def population_view_elements
+      element(:name_label) {|b| b.frm.div(data_label: "Name").label }
+      value(:name) { |b| b.frm.div(data_label: "Name").span(index: 1).text }
+      value(:description) { |b| b.frm.div(data_label: "Description").span(index: 1).text }
+      value(:state) { |b| b.frm.div(data_label: "State").span(index: 1).text }
+      value(:rule) { |b| b.frm.div(data_label: "Rule").span(index: 2).text }
+      value(:operation) { |b| b.frm.div(data_label: "Operation").span(index: 2).text }
+      value(:reference_population) { |b| b.frm.div(data_label: "Reference Population").span(index: 1).text }
     end
 
   end
@@ -314,4 +321,94 @@ module Holidays
     end
   end
 
+end
+
+class ActivityOfferingMaintenanceBase < BasePage
+
+  wrapper_elements
+  validation_elements
+  frame_element
+
+  element(:logistics_div_actual) { |b| b.frm.div(id: /^ActivityOffering-DeliveryLogistic.*-Actuals$/) }
+  action(:revise_logistics) { |b| b.logistics_div_actual.link(text: "Revise").click; b.loading.wait_while_present }
+
+  element(:actual_logistics_table) { |b| b.logistics_div_actual.table()}
+
+  TBA_COLUMN = 0
+  DAYS_COLUMN = 1
+  ST_TIME_COLUMN = 2
+  END_TIME_COLUMN = 3
+  FACILITY_COLUMN = 4
+  ROOM_COLUMN = 5
+  FEATURES_COLUMN = 6
+
+  def self.adl_table_accessor_maker(method_name, column)
+    define_method method_name.to_s do |row|
+      row.cells[column].text()
+    end
+  end
+  adl_table_accessor_maker :get_actual_logistics_tba, TBA_COLUMN
+  adl_table_accessor_maker :get_actual_logistics_days, DAYS_COLUMN
+  adl_table_accessor_maker :get_actual_logistics_start_time,ST_TIME_COLUMN
+  adl_table_accessor_maker :get_actual_logistics_end_time,END_TIME_COLUMN
+  adl_table_accessor_maker :get_actual_logistics_facility,FACILITY_COLUMN
+  adl_table_accessor_maker :get_actual_logistics_room,ROOM_COLUMN
+  adl_table_accessor_maker :get_actual_logistics_features,FEATURES_COLUMN
+
+  element(:logistics_div_requested) { |b| b.frm.div(id: "ActivityOffering-DeliveryLogistic-SchedulePage-Requested") }
+  element(:requested_logistics_table) { |b| b.logistics_div_requested.table()}
+
+  def self.rdl_table_accessor_maker(method_name, column)
+    define_method method_name.to_s do |row|
+      requested_logistics_table.rows[row].cells[column].text()
+    end
+  end
+
+  rdl_table_accessor_maker :get_requested_logistics_tba,TBA_COLUMN
+  rdl_table_accessor_maker :get_requested_logistics_days,DAYS_COLUMN
+  rdl_table_accessor_maker :get_requested_logistics_start_time,ST_TIME_COLUMN
+  rdl_table_accessor_maker :get_requested_logistics_end_time,END_TIME_COLUMN
+  rdl_table_accessor_maker :get_requested_logistics_facility,FACILITY_COLUMN
+  rdl_table_accessor_maker :get_requested_logistics_room,ROOM_COLUMN
+  rdl_table_accessor_maker :get_requested_logistics_features,FEATURES_COLUMN
+
+  element(:personnel_table) { |b| b.frm.div(id: "ao-personnelgroup").table() }
+  ID_COLUMN = 0
+  PERS_NAME_COLUMN = 1
+  AFFILIATION_COLUMN = 2
+  INST_EFFORT_COLUMN = 3
+
+  def get_affiliation(id)
+    target_person_row(id).cells[AFFILIATION_COLUMN].text
+  end
+
+  element(:seat_pools_div) { |b| b.frm.div(id: "ao-seatpoolgroup") }
+  element(:seat_pools_table) { |b| b.seat_pools_div.table() }
+
+  PRIORITY_COLUMN = 0
+  SEATS_COLUMN = 1
+  PERCENT_COLUMN = 2
+  POP_NAME_COLUMN = 3
+  EXP_MILESTONE_COLUMN = 4
+
+  def pool_percentage(pop_name)
+    target_pool_row(pop_name).div(id: /seatLimitPercent_line/).text
+  end
+
+  value(:seat_pool_count) { |b| b.frm.div(data_label: "Seat Pools").span(index: 2).text }
+  value(:seats_remaining_span) { |b| b.frm.div(id: "seatsRemaining").span(index: 2) }
+  value(:seats_remaining) { |b| b.seats_remaining_span.text }
+  value(:percent_seats_remaining) {  |b| b.seats_remaining_span.text[/\d+(?=%)/] }
+  value(:seat_count_remaining) {  |b| b.seats_remaining_span.text[/\d+(?=.S)/] }
+  value(:max_enrollment_count) { |b| b.frm.div(id: "seatsRemaining").text[/\d+(?=\))/] }
+
+  private
+
+  def target_person_row(id)
+    personnel_table.row(text: /#{Regexp.escape(id.to_s)}/)
+  end
+
+  def target_pool_row(pop_name)
+    seat_pools_table.row(text: /#{Regexp.escape(pop_name)}/)
+  end
 end
