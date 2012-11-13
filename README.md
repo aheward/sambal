@@ -1,19 +1,18 @@
-# Functional Automation testing for Kuali and Sakai
+# Functional Automation testing for Kuali
 
 ## Description:
 
 This repository contains the following projects:
 
 - Cucumber features and step definitions for testing Kuali Student
-- The beginnings of a test API for the Kuali projects. This API is called "Sambal".
 
-## APIs
+## DSL
 
-The Sakai APIs are written in Ruby 1.9.2 using the Watir-webdriver and Page Object abstraction layer.  There are test object classes which allow the test code to persist information about parallel objects created within the system under test
+These Cucumber tests of the Kuali Student platform use the Ruby gem "sambal-kuali". Sambal-Kuali is written in Ruby 1.9.2 using Watir-webdriver and rSmart's "TestFactory" gem. It contains page and data object classes which allow the test code to persist information about parallel objects created within the system under test.
 
 ## Cucumber projects
 
-You are of course welcome to use the APIs on their own to write your own test scripts using whatever framework you prefer. However, if you're interested in getting a fast start and either learning the API by example or leveraging work we've already done, you're welcome to grab our Cucumber projects.
+You are of course welcome to use the DSL on your own to write your own test scripts using whatever framework you prefer. However, if you're interested in getting a fast start and either learning the DSL by example or leveraging work we've already done, you're welcome to grab our Cucumber projects.
 
 Obviously, at the moment the Cucumber projects are in their infancy.
 
@@ -37,4 +36,3 @@ Obviously, at the moment the Cucumber projects are in their infancy.
 	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 	or implied. See the License for the specific language governing
 	permissions and limitations under the License.
-
