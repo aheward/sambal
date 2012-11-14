@@ -1,8 +1,10 @@
 class Rollover
 
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :source_term,
                 :target_term

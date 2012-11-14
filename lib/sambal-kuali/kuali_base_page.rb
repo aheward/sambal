@@ -1,11 +1,11 @@
-class BasePage < PageMaker
+class BasePage < PageFactory
 
   class << self
 
     def wrapper_elements
-      crucial_element(:main_menu_el) { |b| b.link(title: "Main Menu") }
-      crucial_element(:logout_el) { |b| b.button(value: "Logout") }
-      crucial_element(:administration_el) { |b| b.link(title: "Administration") }
+      element(:main_menu_el) { |b| b.link(title: "Main Menu") }
+      element(:logout_el) { |b| b.button(value: "Logout") }
+      element(:administration_el) { |b| b.link(title: "Administration") }
 
       action(:home) { |b| b.link(text: "Home").click }
       action(:main_menu) { |p| p.main_menu_el.click }
@@ -24,8 +24,8 @@ class BasePage < PageMaker
     end
 
     def frame_element
-      #crucial_element(:frm) { |b| b.frame(id: "iframeportlet") }
-      crucial_element(:frm) { |b| b } #with iframe removed
+      #element(:frm) { |b| b.frame(id: "iframeportlet") }
+      element(:frm) { |b| b } #with iframe removed
     end
 
     def green_search_buttons

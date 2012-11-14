@@ -1,6 +1,6 @@
 class MainMenu < BasePage
 
-  page_url "#{TEST_SITE}/portal.do?selectedTab=main"
+  page_url "#{$test_site}/portal.do?selectedTab=main"
   expected_title /Kuali Portal Index/
   expected_element :enrollment_home_link
 

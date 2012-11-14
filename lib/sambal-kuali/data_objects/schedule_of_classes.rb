@@ -1,8 +1,10 @@
 class ScheduleOfClasses
 
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :term,
                 :course_search_parm,
@@ -87,7 +89,6 @@ class ScheduleOfClasses
   def expand_course_details
     on DisplayScheduleOfClasses do |page|
       page.course_expand(@exp_course_list[0])
-      puts page.get_ao_type(@exp_course_list[0],page.get_ao_list(@exp_course_list[0])[0])
       raise "error expanding course details for #{@exp_course_list[0]}"  unless page.course_ao_information_table(@exp_course_list[0]).exists?
     end
   end
@@ -111,19 +112,19 @@ class ScheduleOfClasses
   end
 
 
-    def check_results_for_instructor
-      course_list = []
-      on DisplayScheduleOfClasses do |page|
-        course_list = page.get_results_course_list
-        course_list.each do |course_code|
-          page.course_expand(course_code)
-          raise "error expanding course details for #{course_code}"  unless page.course_ao_information_table(course_code).exists?
-          instructor_list = page.get_instructor_list(course_code)
-          raise "data validation issues: instructor #{@instructor_long_name} not found for course: #{course_code}" unless  instructor_list.include?(@instructor_long_name)
-          page.course_expand(course_code) #closes details
-        end
+  def check_results_for_instructor
+    course_list = []
+    on DisplayScheduleOfClasses do |page|
+      course_list = page.get_results_course_list
+      course_list.each do |course_code|
+        page.course_expand(course_code)
+        raise "error expanding course details for #{course_code}"  unless page.course_ao_information_table(course_code).exists?
+        instructor_list = page.get_instructor_list(course_code)
+        raise "data validation issues: instructor #{@instructor_long_name} not found for course: #{course_code}" unless  instructor_list.include?(@instructor_long_name)
+        page.course_expand(course_code) #closes details
       end
     end
+  end
 
   end
 

@@ -1,8 +1,10 @@
 class ActivityOfferingCluster
 
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :is_default,
                 :private_name,

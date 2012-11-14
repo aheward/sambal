@@ -1,8 +1,10 @@
 class CourseOffering
 
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :term,
                 :course,

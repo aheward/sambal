@@ -5,8 +5,8 @@ class CreateCourseOffering < BasePage
 
   expected_element :target_term
 
-  crucial_element(:target_term) { |b| b.frm.div(data_label: "Target Term").text_field() }
-  crucial_element(:catalogue_course_code) { |b| b.frm.div(data_label: "Catalog Course Code").text_field() }
+  element(:target_term) { |b| b.frm.div(data_label: "Target Term").text_field() }
+  element(:catalogue_course_code) { |b| b.frm.div(data_label: "Catalog Course Code").text_field() }
 
   action(:show) { |b| b.frm.button(text: "Show").click; b.loading.wait_while_present } # Persistent ID needed!
   action(:create_offering) { |b| b.frm.button(id: "createOfferingButton").click; b.loading.wait_while_present }

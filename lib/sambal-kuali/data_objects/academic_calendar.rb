@@ -1,8 +1,10 @@
 class AcademicCalendar
 
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :name, :start_date, :end_date, :organization, :events,
                 :holidays, :terms
@@ -11,9 +13,9 @@ class AcademicCalendar
     @browser = browser
 
     defaults = {
-        :name=>random_alphanums,
-        :start_date=>"09/01/#{next_year}",
-        :end_date=>"06/25/#{next_year + 1}",
+        :name=>random_alphanums.strip,
+        :start_date=>"09/01/#{next_year[:year]}",
+        :end_date=>"06/25/#{next_year[:year] + 1}",
         :organization=>"Registrar's Office"
     }
     options = defaults.merge(opts)

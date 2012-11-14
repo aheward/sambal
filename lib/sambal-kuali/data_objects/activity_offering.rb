@@ -1,7 +1,9 @@
 class ActivityOffering
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :code,
                 :format,
@@ -114,8 +116,6 @@ class ActivityOffering
           @requested_delivery_logistics_list.merge(requests_added)
           first_rdl.save()
         end
-        puts "adl keys: #{@actual_delivery_logistics_list.keys}"
-
       end
     end
 
@@ -219,8 +219,8 @@ class ActivityOffering
     update_pop_name = @seat_pool_list[sp_key].population_name
 
     on ActivityOfferingMaintenance do |page|
-      page.update_seats(update_pop_name, seat_count)
-      @seat_pool_list[sp_key].seats = seat_count
+      page.update_seats(update_pop_name, options[:seats])
+      @seat_pool_list[sp_key].seats = options[:seats]
     end
 
 
@@ -257,9 +257,11 @@ end
 
 class SeatPool
 
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :priority,
                 :seats,
@@ -327,9 +329,11 @@ class SeatPool
 end
 
 class Personnel
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :id,
                 :affiliation,
@@ -358,9 +362,11 @@ class Personnel
 end
 
 class DeliveryLogistics
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :tba, #boolean
                 :days,

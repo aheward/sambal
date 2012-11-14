@@ -1,8 +1,10 @@
 class HolidayCalendar
 
-  include PageHelper
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
   include Workflows
-  include Utilities
 
   attr_accessor :name, :start_date, :end_date, :organization, :holiday_types
 
@@ -10,15 +12,15 @@ class HolidayCalendar
     @browser = browser
 
     defaults = {
-        :name=>random_alphanums,
-        :start_date=>"09/01/#{next_year}",
-        :end_date=>"06/25/#{next_year + 1}",
+        :name=>random_alphanums.strip,
+        :start_date=>"09/01/#{next_year[:year]}",
+        :end_date=>"06/25/#{next_year[:year] + 1}",
         :organization=>"Registrar's Office",
         :holiday_types=>[
-            {:type=>"random", :start_date=>"02/01/#{next_year + 1}", :all_day=>true, :date_range=>false, :instructional=>false},
-            {:type=>"random", :start_date=>"03/02/#{next_year + 1}", :end_date=>"03/04/#{next_year + 1}", :all_day=>true, :date_range=>true, :instructional=>false},
-            {:type=>"random", :start_date=>"04/05/#{next_year + 1}", :start_time=>"03:00", :start_meridian=>"pm", :end_time=>"07:44", :end_meridian=>"pm", :all_day=>false, :date_range=>false, :instructional=>false},
-            {:type=>"random", :start_date=>"05/11/#{next_year + 1}", :start_time=>"02:22", :start_meridian=>"am", :end_date=>"05/22/#{next_year + 1}", :end_time=>"07:44", :end_meridian=>"pm", :all_day=>false, :date_range=>true, :instructional=>false}
+            {:type=>"random", :start_date=>"02/01/#{next_year[:year] + 1}", :all_day=>true, :date_range=>false, :instructional=>false},
+            {:type=>"random", :start_date=>"03/02/#{next_year[:year] + 1}", :end_date=>"03/04/#{next_year[:year] + 1}", :all_day=>true, :date_range=>true, :instructional=>false},
+            {:type=>"random", :start_date=>"04/05/#{next_year[:year] + 1}", :start_time=>"03:00", :start_meridian=>"pm", :end_time=>"07:44", :end_meridian=>"pm", :all_day=>false, :date_range=>false, :instructional=>false},
+            {:type=>"random", :start_date=>"05/11/#{next_year[:year] + 1}", :start_time=>"02:22", :start_meridian=>"am", :end_date=>"05/22/#{next_year[:year] + 1}", :end_time=>"07:44", :end_meridian=>"pm", :all_day=>false, :date_range=>true, :instructional=>false}
         ]
     }
     options = defaults.merge(opts)
