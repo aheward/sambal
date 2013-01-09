@@ -43,6 +43,15 @@ module Workflows
     end
   end
 
+  def go_to_manage_reg_windows
+    visit MainMenu do |page|
+      page.enrollment_home
+    end
+    on Enrollment do |page|
+      page.manage_registration_windows
+    end
+  end
+
   def go_to_manage_course_offerings
     visit MainMenu do |page|
       page.enrollment_home
@@ -99,6 +108,15 @@ module Workflows
     end
   end
   # Helper methods...
+
+  def go_to_manage_soc
+    visit MainMenu do |page|
+      page.enrollment_home
+    end
+    on Enrollment do |page|
+      page.manage_soc
+    end
+  end
 
   def logged_in_user
     user = ""

@@ -37,7 +37,7 @@ class Rollover
       page.term.set @target_term
       page.go
       poll_ctr = 0
-      while page.status != "Finished" and poll_ctr < 20     #will wait 10 mins
+      while page.status != "Finished" and poll_ctr < 40     #will wait 20 mins
         poll_ctr = poll_ctr + 1
         sleep 30
         page.go

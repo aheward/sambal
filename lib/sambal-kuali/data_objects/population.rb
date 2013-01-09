@@ -5,21 +5,22 @@ class Population
   include DateFactory
   include StringFactory
   include Workflows
+  include PopulationsSearch
 
   attr_accessor :name, :description, :rule, :operation, :child_populations,
-      :reference_population, :status, :type
+                :reference_population, :status, :type
 
   def initialize(browser, opts={})
     @browser = browser
 
     defaults = {
-      :name=>random_alphanums.strip,
-      :description=>random_alphanums_plus.strip, # TODO: figure out why random_multiline does not validate properly
-      :type=>"rule-based",
-      :child_populations=>[],
-      :rule=>nil,
-      :reference_population=>nil,
-      :status=>"Active"
+        :name=>random_alphanums.strip,
+        :description=>random_alphanums_plus.strip, # TODO: figure out why random_multiline does not validate properly
+        :type=>"rule-based",
+        :child_populations=>[],
+        :rule=>nil,
+        :reference_population=>nil,
+        :status=>"Active"
     }
     options = defaults.merge(opts)
 
@@ -51,7 +52,7 @@ class Population
           @reference_population == nil ? @reference_population = add_random_ref_pop : add_ref_pop(@reference_population) unless @reference_population == " "
         else
           raise "Your population type value must be one of the following:\n'rule-based', 'union-based', 'intersection-based', or 'exclusion-based'.\nPlease update your script"
-       end
+      end
       unless type=='rule-based'
         if @child_populations.length == 0
           2.times { @child_populations << add_random_population }
@@ -76,12 +77,12 @@ class Population
   def edit_population opts={}
 
     defaults = {
-      :name=>@name,
-      :description=>@description,
-      :status=>@status,
-      :rule=>@rule,
-      :reference_population=>@reference_population,
-      :child_populations=>@child_populations
+        :name=>@name,
+        :description=>@description,
+        :status=>@status,
+        :rule=>@rule,
+        :reference_population=>@reference_population,
+        :child_populations=>@child_populations
     }
     options=defaults.merge(opts)
 
@@ -151,7 +152,7 @@ class Population
     on CreatePopulation do |page|
       page.lookup_population
     end
-    population = search_for_random_pop
+    population = search_for_random_pop(@child_populations.to_a + [@reference_population.to_s] )
     on ActivePopulationLookup do |page|
       page.return_value population
     end
@@ -181,7 +182,7 @@ class Population
     on CreatePopulation do |page|
       page.lookup_ref_population
     end
-    population = search_for_random_pop
+    population = search_for_random_pop(@child_populations.to_a + [@reference_population.to_s])
     on ActivePopulationLookup do |page|
       page.return_value population
     end
@@ -195,7 +196,7 @@ class Population
     on EditPopulation do |page|
       page.lookup_ref_population
     end
-    pop = search_for_random_pop
+    pop = search_for_random_pop(@child_populations.to_a + [@reference_population.to_s])
     on ActivePopulationLookup do |page|
       page.return_value pop
     end
@@ -209,7 +210,7 @@ class Population
     on EditPopulation do |page|
       page.lookup_ref_population
     end
-    pop = search_for_random_pop
+    pop = search_for_random_pop(@child_populations.to_a + [@reference_population.to_s])
     on ActivePopulationLookup do |page|
       page.return_value pop
     end
@@ -235,23 +236,6 @@ class Population
     else
       new_rule
     end
-  end
-
-  private
-
-   def search_for_random_pop #checks to make sure not already used
-    names = []
-    on ActivePopulationLookup do |page|
-      page.keyword.wait_until_present
-      page.search
-      no_of_full_pages =  [(page.no_of_entries.to_i/10).to_i,5].min
-      page.change_results_page(1+rand(no_of_full_pages))
-      names = page.results_list
-    end
-    #next 2 lines ensures populat
-    names = names - @child_populations unless @child_populations == nil
-    names.delete(@reference_population) unless @reference_population == nil
-    names[1+rand(names.length-1)]
   end
 
 end

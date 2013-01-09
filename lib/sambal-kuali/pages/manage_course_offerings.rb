@@ -11,7 +11,7 @@ class ManageCourseOfferings < BasePage
   element(:input_code) { |b| b.frm.text_field(name: "inputCode") }
 
   element(:manage_offering_links_div) { |b| b.frm.div(id: "KS-CourseOfferingManagement-CourseOfferingLinks")}
-  action(:manage_registration_groups) { |b| b.manage_offering_links_div.link(text: "Manage Registration Groups").click; b.loading.wait_while_present } # Persistent ID needed!
+  action(:manage_registration_groups) { |b| b.manage_offering_links_div.link(text: "Manage Registration Groups").click; b.loading.wait_while_present }
 
   action(:show) { |b| b.frm.button(text: "Show").click; sleep 2; b.loading.wait_while_present } # Persistent ID needed!
 
@@ -21,6 +21,7 @@ class ManageCourseOfferings < BasePage
   element(:format) { |b| b.frm.select(name: "formatIdForNewAO") }
   element(:activity_type) { |b| b.frm.select(name: "activityIdForNewAO") }
   element(:quantity) { |b| b.frm.text_field(name: "noOfActivityOfferings") }
+
   
   action(:add) { |b| b.frm.button(text: "Add").click; b.loading.wait_while_present } # Persistent ID needed!
   
@@ -47,6 +48,10 @@ class ManageCourseOfferings < BasePage
     activity_offering_results_table.row(text: /\b#{Regexp.escape(code)}\b/)
   end
 
+  def ao_db_id(code)
+    target_row(code).cells[AO_CODE].link.attribute_value("href").scan(/aoInfo.id=(.*)&dataObjectClassName/)[0][0]
+  end
+
   def copy(code)
     target_row(code).link(text: "Copy").click
     loading.wait_while_present
@@ -54,18 +59,34 @@ class ManageCourseOfferings < BasePage
 
   def edit(code)
     target_row(code).link(text: "Edit").click
-    loading.wait_while_present
+    loading.wait_while_present(120)
   end
 
   def delete(code)
-    target_row(code).link(text: "Delete").click
-    loading.wait_while_present
+    retVal = false
+    if target_row(code).link(text: "Delete").exists?
+      target_row(code).link(text: "Delete").click
+      loading.wait_while_present
+      retVal = true
+    else
+      puts "delete not enabled for activity offering code: #{code}"
+    end
+    retVal
+  end
+
+  def select_aos(code_list)
+    for code in code_list
+      if target_row(code).link(text: "Delete").exists?
+        target_row(code).checkbox.set
+      end
+    end
   end
 
   def codes_list
     codes = []
     activity_offering_results_table.rows.each { |row| codes << row[AO_CODE].text }
     codes.delete_if { |code| code == "CODE" }
+    codes.delete_if { |code| code.strip == "" }
     codes
   end
 
