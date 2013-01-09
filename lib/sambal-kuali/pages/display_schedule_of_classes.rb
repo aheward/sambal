@@ -38,11 +38,13 @@ class DisplayScheduleOfClasses < BasePage
   CREDITS_COLUMN = 3
 
   def target_course_row(course_code)
+    results_table.wait_until_present
     results_table.row(text: /\b#{course_code}\b/)
   end
 
   def get_results_course_list()
     course_list = []
+    results_table.wait_until_present
     results_table.rows[1..-1].each do |row|
       course_list << row[COURSE_CODE_COLUMN].text
     end
@@ -57,6 +59,7 @@ class DisplayScheduleOfClasses < BasePage
   def course_expand(course_code)
     target_course_row(course_code).cells[EXPAND_ACTION_COLUMN].image().click
     loading.wait_while_present
+    course_ao_information_table(course_code).wait_until_present
   end
 
   def course_title(course_code)

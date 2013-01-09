@@ -11,3 +11,4 @@ directory.yml
 .idea/
 *.gem
 *.log
+.svn

@@ -7,12 +7,14 @@ class ManageSoc
   include Workflows
 
   attr_accessor :term_code
+  attr_accessor :confirm_state_change
 
   def initialize(browser, opts={})
     @browser = browser
 
     defaults = {
-        :term_code=>"20122"
+        :term_code=>"20122" ,
+        :confirm_state_change=>"Yes"
     }
     options = defaults.merge(opts)
     set_options(options)
@@ -26,27 +28,9 @@ class ManageSoc
     end
   end
 
-  def check_valid_state(currentState)
+  def check_state_change_button_exists(current_state)
     on ManageSocPage do |page|
-      case(currentState)
-        when 'Open'
-          raise "SOC is not Open" unless page.lock_button.exists? and page.lock_button.enabled?
-        when 'Lock'
-          raise "SOC is not in final edit state" unless page.final_edit_button.exists? and page.final_edit_button.enabled?
-        when 'FinalEdit'
-          raise "SOC is not in final edit state" unless page.final_edit_button.exists? and page.final_edit_button.enabled?
-        when 'Schedule'
-          raise "Send to Scheduler action not available" unless page.send_to_scheduler_button.exists? and page.send_to_scheduler_button.enabled?
-          raise "Final edit button not exists or disabled" unless page.final_edit_button.exists? and page.final_edit_button.disabled?
-        else
-          raise "Your Soc State value must be one of the following:\n'Open', 'FinalEdit'.\nPlease update your script"
-      end
-    end
-  end
-
-  def check_state_change_button_exists(currentState)
-    on ManageSocPage do |page|
-    case(currentState)
+    case(current_state)
         when 'Lock'
           raise "SOC is not enabled for Lock" unless page.lock_button.enabled? and page.soc_status == 'Open'
         when 'FinalEdit'
@@ -65,38 +49,37 @@ class ManageSoc
     end
   end
 
-  def change_action(newState,confirmStateChange)
-    validate_confirm_option(confirmStateChange)
+  def change_action(new_state)
     on ManageSocPage do |page|
-      case(newState)
+      case(new_state)
         when 'Lock'
           page.lock_action
-          if confirmStateChange == 'Yes'
+          if @confirm_state_change == 'Yes'
             page.lock_confirm_action
           else
             page.lock_cancel_action
           end
         when 'Schedule'
-          schedule_soc page,confirmStateChange
+          schedule_soc page
         when 'FinalEdit'
           page.final_edit_action
-          if confirmStateChange == 'Yes'
+          if @confirm_state_change == 'Yes'
             page.final_edit_confirm_action
           else
             page.final_edit_cancel_action
           end
         when 'Publish'
-          publish_soc page,confirmStateChange
+          publish_soc page
         else
-          raise "Your Soc State value must be one of the following:\n'Lock', 'FinalEdit'.\nPlease update your script"
+          raise "Your Soc State value must be one of the following:\n'Lock', \n'FinalEdit', \n'Schedule', \n'Publish'.\nPlease update your script"
       end
     end
   end
 
 
-  def schedule_soc(page,confirmStateChange)
+  def schedule_soc(page)
     page.send_to_scheduler_action
-    if confirmStateChange == 'Yes'
+    if @confirm_state_change == 'Yes'
       page.schedule_confirm_action
       tries = 0
       until page.final_edit_button.enabled? or tries == 6 do
@@ -110,9 +93,9 @@ class ManageSoc
   end
 
 
-  def publish_soc(page,confirmStateChange)
+  def publish_soc(page)
     page.publish_action
-    if confirmStateChange == 'Yes'
+    if @confirm_state_change == 'Yes'
       page.publish_confirm_action
       raise "SOC status doesnt change to Publishing In Progress" unless page.soc_status == 'Publishing In Progress'
       raise "Close button not displayed" unless page.close_button.exists?
@@ -124,15 +107,6 @@ class ManageSoc
       end
     else
       page.publish_cancel_action
-    end
-  end
-
-  def validate_confirm_option(confirmStateChange)
-    case confirmStateChange
-      when 'Yes'
-      when 'No'
-      else
-        raise "Invalid confirm dialog option. It should be either 'Yes' or 'No'"
     end
   end
 

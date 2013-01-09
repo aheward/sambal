@@ -1,4 +1,4 @@
-@wip
+@pending
 Feature: delete activity offerings
 
   CO 10.1: As a Departmental Administrator, I want to delete one or more Activity Offerings associated
@@ -8,10 +8,10 @@ Feature: delete activity offerings
 
   Background:
     Given I am logged in as admin
-    Given I am managing a course offering
+    Given I am managing a course offering that has Offered AOs
 
-  Scenario: Delete three AOs
-    When I delete the selected three AOs
+  Scenario: Delete multiple AOs
+    When I delete the selected multiple AOs
     Then The AOs are Successfully deleted
 
   Scenario: Delete an AO

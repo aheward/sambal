@@ -130,6 +130,7 @@ module PopulationsSearch
   private
 
   def target_row(name)
+    results_table.wait_until_present
     results_table.rows.each do |r|
       if (r.cells[POPULATION_NAME].text =~ /#{name}/)
         return r

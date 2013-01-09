@@ -10,7 +10,13 @@ class CourseOffering
                 :course,
                 :suffix,
                 :activity_offering_cluster_list,
-                :ao_list
+                :ao_list,
+                :final_exam_type,
+                :wait_list,
+                :honors_flag,
+                :affiliated_person,
+                :search_by_subj
+
 
 
   def initialize(browser, opts={})
@@ -21,7 +27,12 @@ class CourseOffering
         :course=>"ENGL103",
         :suffix=>"",
         :activity_offering_cluster_list=>[],
-        :ao_list => []
+        :ao_list => [],
+        :final_exam_type => "NONE",
+        :wait_list => "NO",
+        :honors_flag => "NO",
+        :affiliated_person => nil,
+        :search_by_subj => false
     }
     options = defaults.merge(opts)
     set_options(options)
@@ -31,11 +42,78 @@ class CourseOffering
     go_to_manage_course_offerings
     on ManageCourseOfferings do |page|
       page.term.set @term
-      page.input_code.set @course
+
+      if @search_by_subj
+        page.input_code.set @course[0,4]
+      else
+        page.input_code.set @course
+      end
+
       page.show
+
+      begin
+        page.link(text: @course).wait_until_present(5)
+        page.target_row(@course).link(text: "Manage").click
+        page.loading.wait_while_present
+      rescue Watir::Wait::TimeoutError
+        #means was single CO returned, AO list is already displayed
+      end
     end
+
     on ManageCourseOfferings do |page|
       @ao_list = page.codes_list
+    end
+  end
+
+  def select_final_option (final_option)
+    on CourseOfferingEdit do |page|
+      case final_option
+        when "Standard final Exam"
+          page.final_exam_option_standard == "STANDARD"
+          @final_exam_type = "STANDARD"
+        when "Alternate final assessment"
+          page.final_exam_option_alternate
+          @final_exam_type = "ALTERNATE"
+        when "No final exam or assessment"
+          page.final_exam_option_none
+          @final_exam_type = "NONE"
+      end
+    end
+  end
+
+  def select_wait_list_on(list_level, list_type)
+    on CourseOfferingEdit do |page|
+      page.waitlist_on
+      @wait_list = "YES"
+      case list_level
+        when "Course Offering"
+          page.waitlist_option_course_offering
+        when "Activity Offering"
+          page.waitlist_option_activity_offering
+      end
+      page.waitlist_select.select(list_type)
+    end
+  end
+
+  def search_by_subjectcode
+    go_to_manage_course_offerings
+    on ManageCourseOfferings do |page|
+      page.term.set @term
+      page.input_code.set @course[0,4]
+      page.show
+    end
+  end
+
+  def honors_flag_on
+    on CourseOfferingEdit do |page|
+      page.honors_flag.set
+      @honors_flag = "YES"
+    end
+  end
+
+  def view_course_details
+    on ManageCourseOfferingList do |page|
+      page.view_course_offering @course
     end
   end
 
@@ -60,6 +138,13 @@ class CourseOffering
     end
   end
 
+  def copy_ao(ao_code)
+    aoCode = ao_code[:ao_code]
+    on ManageCourseOfferings do |page|
+      page.copy(aoCode)
+    end
+  end
+
   def delete_ao_list(ao_code_list)
     @aoCode = ao_code_list[:code_list]
     on ManageCourseOfferings do |page|
@@ -70,6 +155,28 @@ class CourseOffering
     on ActivityOfferingConfirmDelete do |page|
       page.delete_activity_offering
     end
+  end
+
+  def ao_status(inputOrg)
+    retVal = nil
+    aoCode = inputOrg[:inputs][0]
+    aoState = inputOrg[:inputs][1]
+    on ManageCourseOfferings do |page|
+      if page.ao_status(aoCode, aoState)
+        retVal = aoState
+      end
+    end
+    retVal
+  end
+
+  def ao_schedule_data(ao_code)
+    retVal = nil
+    aoCode = ao_code[:ao_code]
+    on ManageCourseOfferings do |page|
+       retVal = page.ao_schedule_data(aoCode)
+    end
+
+    retVal
   end
 
   def add_ao_cluster(ao_cluster)
@@ -110,7 +217,7 @@ class CourseOffering
     on ManageCourseOfferingList do |page|
       post_copy_co_list = page.co_list
     end
-    (post_copy_co_list - pre_copy_co_list).first
+    @course = (post_copy_co_list - pre_copy_co_list).first
   end
 
   def cleanup_all_ao_clusters

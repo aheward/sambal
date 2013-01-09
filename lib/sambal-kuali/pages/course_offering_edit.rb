@@ -4,7 +4,7 @@ class CourseOfferingEdit < BasePage
   validation_elements
   frame_element
 
-  expected_element :course_code_element
+  #expected_element :course_code_element
 
   action(:submit) { |b| b.frm.button(text: "submit").click; b.loading.wait_while_present }
   action(:cancel) { |b| b.frm.link(text: "cancel").click; b.loading.wait_while_present }
@@ -36,10 +36,17 @@ class CourseOfferingEdit < BasePage
     delivery_format_row(format).cells[GRADE_ROSTER_LEVEL_COLUMN].select().selected_options[0].text
   end
 
+  def select_grade_roster_level(format)
+    delivery_format_row(format).cells[GRADE_ROSTER_LEVEL_COLUMN].select().select(format)
+  end
+
   def final_exam_driver(format)
     delivery_format_row(format).cells[FINAL_EXAM_COLUMN].text
   end
 
+  def select_final_exam_driver(format)
+    delivery_format_row(format).cells[FINAL_EXAM_COLUMN].select().select(format)
+  end
 
   element(:waitlist_checkbox) { |b| b.frm.div(data_label: "Waitlists").checkbox() }
   value(:has_waitlist?) { |b| b.frm.waitlist_checkbox.value }
@@ -57,7 +64,8 @@ class CourseOfferingEdit < BasePage
   element(:personnel_table) { |b| b.frm.div(id: "KS-ActivityOffering-PersonnelSection").table() }
 
   element(:add_person_id) { |b| b.personnel_table.rows[1].cells[ID_COLUMN].text_field() }
-  action(:lookup_person) { |b| b.personnel_table.rows[1].cells[ID_COLUMN].image().click; b.loading.wait_while_present } # Need persistent ID!
+  #action(:lookup_person) { |b| b.personnel_table.rows[1].cells[ID_COLUMN].image().click; b.loading.wait_while_present } # Need persistent ID!
+  action(:lookup_person) { |b| b.personnel_table.rows[1].cells[ID_COLUMN].input(title: "Search Field").click; b.loading.wait_while_present }
   element(:add_affiliation) { |b| b.personnel_table.rows[1].cells[AFFILIATION_COLUMN].select() }
   element(:add_personnel_button_element) { |b| b.personnel_table.rows[1].button(text: "add") }
   action(:add_personnel) { |b| b.add_personnel_button_element.click; b.loading.wait_while_present } # Needs persistent ID value
