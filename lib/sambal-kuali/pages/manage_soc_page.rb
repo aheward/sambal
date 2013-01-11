@@ -37,5 +37,20 @@ class ManageSocPage < BasePage
   element(:soc_status) { |b| b.div(id: "socStatus").span(index: 2).text }
   element(:soc_scheduling_status) { |b| b.div(id: "socSchedulingStatus").span(index: 2).text }
   element(:soc_publishing_status) { |b| b.div(id: "socPublishingStatus").span(index: 2).text }
+  element(:schedule_initiated_date) { |b| b.div(id: "schedule_initiated_date").span(index: 2).text }
+  element(:schedule_completed_date) { |b| b.div(id: "schedule_completed_date").span(index: 2).text }
+  element(:schedule_duration) { |b| b.div(id: "schedule_duration").span(index: 2).text }
+  element(:publish_initiated_date) { |b| b.div(id: "publish_initiated_date").span(index: 2).text }
+  element(:publish_completed_date) { |b| b.div(id: "publish_completed_date").span(index: 2).text }
+  element(:publish_duration) { |b| b.div(id: "publish_duration").span(index: 2).text }
+
+
+  element(:status_table) { |b| b.div(id: "ManageSOCView-StatusHistory-SubSection2").table }
+
+  def is_date_exists(status_name)
+    status_table.row(text: /\b#{Regexp.escape(status_name)}\b/).cells[1].text != nil
+  end
+
+
 
 end

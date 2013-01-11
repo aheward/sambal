@@ -13,8 +13,15 @@ class CourseOffering
                 :ao_list,
                 :final_exam_type,
                 :wait_list,
+                :wait_list_level,
+                :wait_list_type,
+                :grade_format,
+                :final_exam_driver,
                 :honors_flag,
-                :affiliated_person,
+                :affiliated_person_list,
+                :affiliated_org_list,
+                :grade_options,
+                :reg_options,
                 :search_by_subj
 
 
@@ -30,12 +37,148 @@ class CourseOffering
         :ao_list => [],
         :final_exam_type => "NONE",
         :wait_list => "NO",
+        :wait_list_level => "Course Offering",
+        :wait_list_type => "Automatic",
+        :grade_format => "",
+        :final_exam_driver => "",
         :honors_flag => "NO",
-        :affiliated_person => nil,
+        :affiliated_person_list => {},
+        :affiliated_org_list => {},
+        :grade_options => "Letter",
+        :reg_options => "None available",
         :search_by_subj => false
     }
     options = defaults.merge(opts)
     set_options(options)
+  end
+
+  def edit_offering opts={}
+
+    defaults = {
+        :suffix=>@suffix,
+        :final_exam_type => @final_exam_type,
+        :wait_list => @wait_list,
+        :honors_flag => @honors_flag,
+        :affiliated_person_list => @affiliated_person_list,
+        :affiliated_org_list => @affiliated_org_list,
+        :wait_list_level => @wait_list_level,
+        :grade_format => @grade_format,
+        :final_exam_driver => @final_exam_driver,
+        :wait_list_type => @wait_list_type,
+    }
+
+    options=defaults.merge(opts)
+
+    if options[:suffix] != @suffix
+     #TODO:Add Suffix to edit method Course Offerings
+    end
+
+    if options[:wait_list] != @wait_list
+      on CourseOfferingEdit do |page|
+        if options[:wait_list] == "NO"
+         page.waitlist_off
+        else
+         page.waitlist_on
+        end
+        @wait_list = options[:wait_list]
+      end
+    end
+
+    if options[:wait_list_level] != @wait_list_level
+      on CourseOfferingEdit do |page|
+      if options[:wait_list_level] == "Activity Offering"
+       page.waitlist_option_activity_offering
+      else
+       page.waitlist_option_course_offering
+      end
+      @wait_list_level = options[:wait_list_level]
+      end
+    end
+
+    if options[:wait_list_type] != @wait_list_type
+      on CourseOfferingEdit do |page|
+        @wait_list_type = options[:wait_list_type]
+        page.waitlist_select.select(@wait_list_type)
+      end
+    end
+
+    if options[:honors_flag] != @honors_flag
+      on CourseOfferingEdit do |page|
+       if options[:honors_flag] == "YES"
+        page.honors_flag.set
+       else
+        page.honors_flag.clear
+      end
+        @honors_flag = options[:honors_flag]
+      end
+    end
+
+    if options[:final_exam_type] != @final_exam_type
+      on CourseOfferingEdit do |page|
+        case options[:final_exam_type]
+          when "Standard final Exam"
+            page.final_exam_option_standard
+            @final_exam_type = "STANDARD"
+          when "Alternate final assessment"
+            page.final_exam_option_alternate
+            @final_exam_type = "ALTERNATE"
+          when "No final exam or assessment"
+            page.final_exam_option_none
+            @final_exam_type = "NONE"
+        end
+      end
+    end
+
+    if options[:grade_format] != @grade_format
+     on CourseOfferingEdit do |page|
+       page.select_grade_roster_level(options[:grade_format])
+     end
+      @grade_format = options[:grade_format]
+    end
+
+    if options[:final_exam_driver] != @final_exam_driver
+      on CourseOfferingEdit do |page|
+        page.select_final_exam_driver(options[:final_exam_driver])
+      end
+      @final_exam_driver = options[:final_exam_driver]
+    end
+
+    if options[:affiliated_person_list] != @affiliated_person_list
+      options[:affiliated_person_list].values.each do |person|
+        on CourseOfferingEdit do |page|
+          page.lookup_person
+        end
+        on PersonnelLookup do |page|
+          page.principal_name.set person.id
+          page.search
+          page.return_value(person.id)
+        end
+        on CourseOfferingEdit do |page|
+          page.add_affiliation.select(person.affiliation)
+          page.add_personnel
+        end
+      end
+    end
+
+    if options[:affiliated_org_list] != @affiliated_org_list
+      options[:affiliated_org_list].values.each do |org|
+        on CourseOfferingEdit do |page|
+          page.lookup_org
+        end
+
+        on OrgLookupPopUp do |page|
+          page.short_name.set org.org_name
+          page.search
+          page.return_value(org.org_name)
+        end
+
+        on CourseOfferingEdit do |page|
+          page.add_org
+        end
+      end
+    end
+
+
   end
 
   def manage
@@ -65,49 +208,12 @@ class CourseOffering
     end
   end
 
-  def select_final_option (final_option)
-    on CourseOfferingEdit do |page|
-      case final_option
-        when "Standard final Exam"
-          page.final_exam_option_standard == "STANDARD"
-          @final_exam_type = "STANDARD"
-        when "Alternate final assessment"
-          page.final_exam_option_alternate
-          @final_exam_type = "ALTERNATE"
-        when "No final exam or assessment"
-          page.final_exam_option_none
-          @final_exam_type = "NONE"
-      end
-    end
-  end
-
-  def select_wait_list_on(list_level, list_type)
-    on CourseOfferingEdit do |page|
-      page.waitlist_on
-      @wait_list = "YES"
-      case list_level
-        when "Course Offering"
-          page.waitlist_option_course_offering
-        when "Activity Offering"
-          page.waitlist_option_activity_offering
-      end
-      page.waitlist_select.select(list_type)
-    end
-  end
-
   def search_by_subjectcode
     go_to_manage_course_offerings
     on ManageCourseOfferings do |page|
       page.term.set @term
       page.input_code.set @course[0,4]
       page.show
-    end
-  end
-
-  def honors_flag_on
-    on CourseOfferingEdit do |page|
-      page.honors_flag.set
-      @honors_flag = "YES"
     end
   end
 
@@ -217,7 +323,43 @@ class CourseOffering
     on ManageCourseOfferingList do |page|
       post_copy_co_list = page.co_list
     end
+
     @course = (post_copy_co_list - pre_copy_co_list).first
+  end
+
+  def delete_co(args={})
+
+    should_confirm_delete = false
+    case args[:should_confirm_delete]
+      when true
+        should_confirm_delete = true
+    end
+
+    should_delete_from_subj_code_view = false
+    case args[:should_delete_from_subj_code_view]
+      when true
+        should_delete_from_subj_code_view = true
+    end
+
+    on ManageCourseOfferings do |page|
+      case should_delete_from_subj_code_view
+        when true
+          search_by_subjectcode
+          page.target_row(@course).link(text: "Delete").click
+        else
+          manage
+          page.delete_offering
+      end
+    end
+    on DeleteCourseOffering do |page|
+      case should_confirm_delete
+        when true
+          page.confirm_delete
+        else
+          page.cancel_delete
+      end
+    end
+
   end
 
   def cleanup_all_ao_clusters
@@ -248,7 +390,28 @@ class CourseOffering
       end
     end
   end
+end
 
+class AffiliatedOrg
 
+  include Foundry
+  include DataFactory
+  include DateFactory
+  include StringFactory
+  include Workflows
+
+  attr_accessor :org_id,
+                :org_name
+
+  def initialize(browser, opts={})
+      @browser = browser
+
+       defaults = {
+                 :org_id => "68",
+                 :org_name => "Chemistry"
+                  }
+        options = defaults.merge(opts)
+        set_options(options)
+   end
 
 end
