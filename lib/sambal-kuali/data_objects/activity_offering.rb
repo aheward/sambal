@@ -364,7 +364,10 @@
       set_options(options)
     end
 
-    def add_personnel
+    def add_personnel(opts={})
+      @id = opts[:id]
+      @affiliation = opts[:affiliation]
+      @inst_effort = opts[:inst_effort]
       on ActivityOfferingMaintenance do |page|
         page.add_person_id.set @id
         page.add_affiliation.select @affiliation
