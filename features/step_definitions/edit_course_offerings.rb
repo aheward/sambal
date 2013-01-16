@@ -35,6 +35,12 @@ When /^I select a final exam type of "([^"]*)"$/ do |final_option|
      @course_offering.edit_offering :final_exam_type => final_option
 end
 
+When /^a delivery format-type of "([^"]*)"$/ do |delivery_format|
+  on CourseOfferingEdit do |page|
+    page.delivery_format_row(delivery_format)
+  end
+end
+
 When /^a grade roster level of "([^"]*)"$/ do |grade_format|
       @course_offering.edit_offering :grade_format => grade_format
 end

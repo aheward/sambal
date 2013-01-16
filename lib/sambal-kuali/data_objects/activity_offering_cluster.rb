@@ -116,7 +116,7 @@ class ActivityOfferingCluster
       row.cells[0].checkbox.set
       page.select_cluster_for_ao_move(@private_name,target_cluster.private_name)
       page.move_ao_from_cluster_submit(@private_name)
-      @assigned_ao_list.delete(ao_code)
+      assigned_ao_list.delete!(ao_code)
       target_cluster.assigned_ao_list << ao_code
     end
   end
@@ -125,46 +125,15 @@ class ActivityOfferingCluster
     on ManageRegistrationGroups do |page|
       row = page.get_cluster_ao_row(@private_name,ao_code)
       row.link(text: "Remove").click
-      page.loading.wait_while_present
-      @assigned_ao_list.delete(ao_code)
+      loading.wait_while_present
+      assigned_ao_list.delete!(ao_code)
     end
-  end
-
-  def delete
-    on ManageRegistrationGroups do |page|
-      page.remove_cluster(@private_name)
-      page.confirm_delete_cluster
-      begin
-        page.cluster_list_item_div(@private_name).wait_while_present(60)
-      rescue Watir::Exception::UnknownObjectException
-        #ignore
-      end
-    end
-    @assigned_ao_list = []
   end
 
   def generate_all_reg_groups
     on ManageRegistrationGroups do |page|
       page.generate_all_reg_groups
     end
-  end
-
-  def rename(opts={})
-
-    defaults = {
-        :private_name=>"#{random_alphanums(5).strip}_pri",
-        :published_name=>"#{random_alphanums(5).strip}_pub",
-        :expect_success=>true
-    }
-    options = defaults.merge(opts)
-
-     on ManageRegistrationGroups do |page|
-       page.rename_cluster(@private_name)
-       set_options(options) unless !options[:expect_success]
-       page.rename_private_name.set @private_name
-       page.rename_published_name.set @published_name
-       page.replace_cluster_names
-     end
   end
 
 end

@@ -14,7 +14,7 @@ class ManageCourseOfferings < BasePage
 
   element(:manage_offering_links_div) { |b| b.frm.div(id: "KS-CourseOfferingManagement-CourseOfferingLinks")}
   action(:delete_offering) { |b| b.manage_offering_links_div.link(text: "Delete").click; b.loading.wait_while_present }
-  action(:manage_registration_groups) { |b| b.manage_offering_links_div.link(text: "Manage Registration Groups").click }
+  action(:manage_registration_groups) { |b| b.manage_offering_links_div.link(text: "Manage Registration Groups").click; b.loading.wait_while_present }
 
   action(:show) { |b| b.frm.button(text: "Show").click; sleep 2; b.loading.wait_while_present } # Persistent ID needed!
 

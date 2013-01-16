@@ -5,7 +5,6 @@ class ManageSocPage < BasePage
   wrapper_elements
   frame_element
 
-  element(:message) {|b| b.frm.ul(id: "pageValidationList").li.text}
   element(:term_code)  { |b| b.frm.text_field(name: "termCode") }
   element(:lock_button)  { |b| b.frm.button(id: "ManageSOCView-SchedulingDetails-LockSetButton") }
   element(:final_edit_button)  { |b| b.frm.button(id: "ManageSOCView-SchedulingDetails-FinalEditButton") }

@@ -68,7 +68,6 @@ class ManageSoc
           page.lock_action
           if confirm_state_change == 'Yes'
             page.lock_confirm_action
-            raise "'Set of Courses has been Locked.' not displayed after Lock" unless page.message == 'Set of Courses has been Locked.'
           else
             page.lock_cancel_action
           end
@@ -78,7 +77,6 @@ class ManageSoc
           page.final_edit_action
           if confirm_state_change == 'Yes'
             page.final_edit_confirm_action
-            raise "Info message text at the top doesnt match" unless page.message == 'Set of Courses has been opened for Final Edits.'
           else
             page.final_edit_cancel_action
           end
@@ -99,7 +97,7 @@ class ManageSoc
       raise "Schedule Initiated Date is blank" unless page.schedule_initiated_date != nil
       raise "Once schedule started, schedule completed date should say 'Scheduling in progress'" unless page.schedule_completed_date == 'Scheduling in progress'
       raise "Schedule duration should have the '(in progress)' text at the end" unless page.schedule_duration.should =~ /(in progress)/
-      raise "Info message text at the top doesnt match" unless page.message == 'Approved activities were successfully sent to Scheduler.'
+
       until page.final_edit_button.enabled? or tries == 6 do
         sleep 20
         tries += 1

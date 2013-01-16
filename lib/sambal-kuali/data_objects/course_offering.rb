@@ -52,26 +52,28 @@ class CourseOffering
     set_options(options)
   end
 
-  def edit_offering options={}
-    # defaults = {
-    #     :suffix=>@suffix,
-    #     :final_exam_type => @final_exam_type,
-    #     :wait_list => @wait_list,
-    #     :honors_flag => @honors_flag,
-    #     :affiliated_person_list => @affiliated_person_list,
-    #     :affiliated_org_list => @affiliated_org_list,
-    #     :wait_list_level => @wait_list_level,
-    #     :grade_format => @grade_format,
-    #     :final_exam_driver => @final_exam_driver,
-    #     :wait_list_type => @wait_list_type
-    # }
+  def edit_offering opts={}
 
-    #options=defaults.merge(opts)
+    defaults = {
+        :suffix=>@suffix,
+        :final_exam_type => @final_exam_type,
+        :wait_list => @wait_list,
+        :honors_flag => @honors_flag,
+        :affiliated_person_list => @affiliated_person_list,
+        :affiliated_org_list => @affiliated_org_list,
+        :wait_list_level => @wait_list_level,
+        :grade_format => @grade_format,
+        :final_exam_driver => @final_exam_driver,
+        :wait_list_type => @wait_list_type,
+    }
+
+    options=defaults.merge(opts)
+
     if options[:suffix] != @suffix
      #TODO:Add Suffix to edit method Course Offerings
     end
 
-    if options[:wait_list] != nil
+    if options[:wait_list] != @wait_list
       on CourseOfferingEdit do |page|
         if options[:wait_list] == "NO"
          page.waitlist_off
@@ -82,7 +84,7 @@ class CourseOffering
       end
     end
 
-    if options[:wait_list_level] != nil
+    if options[:wait_list_level] != @wait_list_level
       on CourseOfferingEdit do |page|
       if options[:wait_list_level] == "Activity Offering"
        page.waitlist_option_activity_offering
@@ -93,14 +95,14 @@ class CourseOffering
       end
     end
 
-    if options[:wait_list_type] != nil
+    if options[:wait_list_type] != @wait_list_type
       on CourseOfferingEdit do |page|
         @wait_list_type = options[:wait_list_type]
         page.waitlist_select.select(@wait_list_type)
       end
     end
 
-    if options[:honors_flag] != nil
+    if options[:honors_flag] != @honors_flag
       on CourseOfferingEdit do |page|
        if options[:honors_flag] == "YES"
         page.honors_flag.set
@@ -111,7 +113,7 @@ class CourseOffering
       end
     end
 
-    if options[:final_exam_type] != nil
+    if options[:final_exam_type] != @final_exam_type
       on CourseOfferingEdit do |page|
         case options[:final_exam_type]
           when "Standard final Exam"
@@ -127,21 +129,21 @@ class CourseOffering
       end
     end
 
-    if options[:grade_format] != nil
+    if options[:grade_format] != @grade_format
      on CourseOfferingEdit do |page|
        page.select_grade_roster_level(options[:grade_format])
      end
       @grade_format = options[:grade_format]
     end
 
-    if options[:final_exam_driver] != nil
+    if options[:final_exam_driver] != @final_exam_driver
       on CourseOfferingEdit do |page|
         page.select_final_exam_driver(options[:final_exam_driver])
       end
       @final_exam_driver = options[:final_exam_driver]
     end
 
-    if options[:affiliated_person_list] != nil
+    if options[:affiliated_person_list] != @affiliated_person_list
       options[:affiliated_person_list].values.each do |person|
         on CourseOfferingEdit do |page|
           page.lookup_person
@@ -158,7 +160,7 @@ class CourseOffering
       end
     end
 
-    if options[:affiliated_org_list] != nil
+    if options[:affiliated_org_list] != @affiliated_org_list
       options[:affiliated_org_list].values.each do |org|
         on CourseOfferingEdit do |page|
           page.lookup_org
@@ -232,27 +234,27 @@ class CourseOffering
 
   end
 
-  def delete_ao(opts)
-    ao_code = opts[:ao_code]
+  def delete_ao(ao_code)
+    aoCode = ao_code[:ao_code]
     on ManageCourseOfferings do |page|
-      page.delete(ao_code)
+      page.delete(aoCode)
     end
     on ActivityOfferingConfirmDelete do |page|
       page.delete_activity_offering
     end
   end
 
-  def copy_ao(opts)
-    ao_code = opts[:ao_code]
+  def copy_ao(ao_code)
+    aoCode = ao_code[:ao_code]
     on ManageCourseOfferings do |page|
-      page.copy(ao_code)
+      page.copy(aoCode)
     end
   end
 
-  def delete_ao_list(opts)
-    ao_code_list = opts[:code_list]
+  def delete_ao_list(ao_code_list)
+    @aoCode = ao_code_list[:code_list]
     on ManageCourseOfferings do |page|
-      page.select_aos(ao_code_list)
+      page.select_aos(@aoCode)
       page.selected_offering_actions.select("Delete")
       page.go
     end
@@ -287,13 +289,18 @@ class CourseOffering
     @activity_offering_cluster_list << ao_cluster
   end
 
+#  def add_aos_to_clusters
+#    @activity_offering_cluster_list.each do |cluster|
+#      cluster.add_unassigned_aos
+#    end
+#  end                                                                                                                                                                                            c
+
   def expected_unassigned_ao_list
     expected_unassigned = @ao_list
     @activity_offering_cluster_list.each do |cluster|
       expected_unassigned = expected_unassigned - cluster.assigned_ao_list
     end
     expected_unassigned.delete_if { |id| id.strip == "" }
-    expected_unassigned
   end
 
   def create_co_copy
@@ -359,9 +366,11 @@ class CourseOffering
     existing_cluster_list = []
     on ManageRegistrationGroups do |page|
       page.cluster_div_list.each do |cluster_div|
+        puts "cluster_div.span().text(): #{cluster_div.span().text()}"
         existing_cluster_list << cluster_div.span().text()
       end
     end
+
 
     existing_cluster_list.each do |cluster|
       on ManageRegistrationGroups do |page|
@@ -378,11 +387,6 @@ class CourseOffering
         end
         page.remove_cluster(cluster)
         page.confirm_delete_cluster
-        begin
-          page.cluster_list_item_div(cluster).wait_while_present(60)
-        rescue Watir::Exception::UnknownObjectException
-          #ignore
-        end
       end
     end
   end

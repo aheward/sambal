@@ -1,10 +1,11 @@
-When /^I manage an existing Course Offering in "(.*?)" view$/ do |view|
-  if view == 'Subject Code'
-    @course_offering = make CourseOffering, :course=>"CHEM142", :search_by_subj => true
-  else
-    @course_offering = make CourseOffering, :course=>"CHEM317"
-  end
+When /^I manage an existing Course Offering in Course Offering Code view$/ do
+  @course_offering = make CourseOffering, :course=>"CHEM317"
+  @course_offering.manage
+  $total_number = @course_offering.ao_list.count
+end
 
+When /^I manage an existing Course Offering in Subject Code view$/ do
+  @course_offering = make CourseOffering, :course=>"CHEM142", :search_by_subj => true
   @course_offering.manage
   $total_number = @course_offering.ao_list.count
 end

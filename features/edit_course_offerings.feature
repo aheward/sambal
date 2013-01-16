@@ -1,4 +1,4 @@
-@nightly
+@draft
 Feature: Edit Course Offerings
   Background:
     Given I am logged in as admin

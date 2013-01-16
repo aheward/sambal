@@ -3,7 +3,7 @@ class ManageRegistrationGroups < BasePage
   wrapper_elements
   frame_element
 
-  expected_element :subject_code, 120
+  expected_element :subject_code
 
   element(:subject_code) { |b| b.frm.div(id: "manageRegistrationGroupsView").h3.span() }
   element(:format_select) { |b| b.frm.div(data_label: "Select Format").select() }
@@ -11,7 +11,7 @@ class ManageRegistrationGroups < BasePage
   element(:page_validation_error_list) { |b| b.frm.ul(id: "pageValidationList") }
   value(:first_page_validation_error)  { |b| b.page_validation_error_list.li().text() }
 
-  element(:unassigned_ao_table) { |b| b.frm.div(id: /KS-ManageRegistrationGroups-UnassignedActivityOfferingsPerFormatSection/).table() }
+  element(:unassigned_ao_table) { |b| b.frm.div(id: "KS-ManageRegistrationGroups-UnassignedActivityOfferingsPerFormatSection").table() }
 
   def target_unassigned_ao_row(ao_code)
     unassigned_ao_table.row(text: /\b#{ao_code}\b/)
@@ -60,15 +60,6 @@ class ManageRegistrationGroups < BasePage
   value(:create_cluster_first_error_msg)  { |b| b.div(id: /jquerybubblepopup/).ul.li.text() }
   #end create cluster dialog
 
-  #create cluster dialog
-  element(:renameClusterDialog_div)  { |b| b.frm.div(id: "renameClusterDialog") }
-  element(:rename_private_name) { |b| b.renameClusterDialog_div.div(data_label: "Private Name").text_field() }
-  element(:rename_published_name) { |b| b.renameClusterDialog_div.div(data_label: "Published Name").text_field() }
-  action(:replace_cluster_names){ |b|b.renameClusterDialog_div.checkbox(index: 0).click; b.loading.wait_while_present}
-  action(:cancel_rename_cluster){ |b|b.renameClusterDialog_div.checkbox(index: 1).click; b.loading.wait_while_present}
-  value(:rename_cluster_first_error_msg)  { |b| b.div(id: /jquerybubblepopup/).ul.li.text() }
-  #end create cluster dialog
-
   #delete cluster dialog
   element(:deleteClusterDialog_div)  { |b| b.frm.div(id: "confirmToDeleteClusterDialog") }
   action(:confirm_delete_cluster){ |b|b.deleteClusterDialog_div.checkbox(index: 0).click; b.loading.wait_while_present}
@@ -96,11 +87,6 @@ class ManageRegistrationGroups < BasePage
    cluster_list_item_div(private_name).span().text()
   end
 
-  def cluster_published_name(private_name)
-    full_name = cluster_list_item_div(private_name).span().text()
-    full_name.slice(full_name.index('(')+1..-2)
-  end
-
   def cluster_generate_reg_groups(private_name)
     cluster_list_item_div(private_name).link(text: "Generate Registration Groups").click
     loading.wait_while_present
@@ -117,11 +103,6 @@ class ManageRegistrationGroups < BasePage
 
   def remove_cluster(private_name)
     cluster_list_item_div(private_name).link(text: "Delete").click
-    loading.wait_while_present
-  end
-
-  def rename_cluster(private_name)
-    cluster_list_item_div(private_name).link(text: "Rename").click
     loading.wait_while_present
   end
 
@@ -157,15 +138,6 @@ class ManageRegistrationGroups < BasePage
 
   def get_cluster_ao_row(private_name, ao_code)
     cluster_list_item_div(private_name).table.row(text: /\b#{Regexp.escape(ao_code)}\b/)
-  end
-
-  def get_cluster_assigned_ao_list(private_name)
-    assigned_ao_list = []
-    cluster_list_item_div(private_name).table.rows[1..-1].each do |row|
-      assigned_ao_list << row.cells[1].text
-    end
-    assigned_ao_list.delete_if{|ao| ao == "" }
-    assigned_ao_list
   end
 
   def select_cluster_for_ao_move(source_private_name,target_private_name)
