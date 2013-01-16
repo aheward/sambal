@@ -40,25 +40,23 @@ And /^verify that the changes of ADL have persisted$/ do
 end
 
 
-#Scenario: Edit Activity Offering Personnel attributes
-When /^I change Personnel attributes$/ do
-  # H.ERICD, admin are ids can be used.
-  # These line should be moved to a step definition that says:
-  # "Given I have a teaching assistant". They are not appropriate in this
-  # step definition, which is specifically about CHANGING
-  # the attributes of something that already exists.
-  @teaching_assistant = make Personnel, id: @added_person_id, affiliation: "Teaching Assistant", inst_effort: @effort_num
-  @teaching_assistant.create
-  #page.add_person_id.set  @added_person_id
-  #page.add_affiliation.select("Teaching Assistant")
-  #page.add_inst_effort.set @effort_num
-  #page.add_personnel
+  #Scenario: Edit Activity Offering Personnel attributes
+  When /^I change Personnel attributes$/ do
+    # H.ERICD, admin are ids can be used.
+    # These line should be moved to a step definition that says:
+    # "Given I have a teaching assistant". They are not appropriate in this
+    # step definition, which is specifically about CHANGING
+    # the attributes of something that already exists.
+    @teaching_assistant = make Personnel
+    @teaching_assistant.create
+    #page.add_person_id.set  @added_person_id
+    #page.add_affiliation.select("Teaching Assistant")
+    #page.add_inst_effort.set @effort_num
+    #page.add_personnel
 
-  on ActivityOfferingMaintenance do |page|
-
-    page.submit
+    # This should be the entirety of this step definition:
+    @teaching_assistant.edit id: @added_person_id, affiliation: "Teaching Assistant", inst_effort: @effort_num
   end
-end
 
 And /^verify that the changes of the Personnel attributes have persisted$/ do
   @course_offering.manage
