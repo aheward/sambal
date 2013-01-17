@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Functional Automation testing for Kuali and Sakai
 
 ## Description:
@@ -36,3 +37,7 @@ You are of course welcome to use the DSL on your own to write your own test scri
 	or implied. See the License for the specific language governing
 	permissions and limitations under the License.
 
+=======
+KSAutomatedTests
+================
+>>>>>>> 7c6082eec034fb1067bf6981e28d27e2444af742
