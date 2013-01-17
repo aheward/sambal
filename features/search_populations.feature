@@ -1,4 +1,4 @@
-@pending
+@nightly
 Feature: Search for an existing population
 
 In order to avoid creating a duplicate population (alternate: In order to modify an existing population)

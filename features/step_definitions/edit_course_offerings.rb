@@ -35,12 +35,6 @@ When /^I select a final exam type of "([^"]*)"$/ do |final_option|
      @course_offering.edit_offering :final_exam_type => final_option
 end
 
-When /^a delivery format-type of "([^"]*)"$/ do |delivery_format|
-  on CourseOfferingEdit do |page|
-    page.delivery_format_row(delivery_format)
-  end
-end
-
 When /^a grade roster level of "([^"]*)"$/ do |grade_format|
       @course_offering.edit_offering :grade_format => grade_format
 end
@@ -88,6 +82,6 @@ When /^I add an administering organization and activate the honors flag$/ do
  organization_list = {}
  organization_list[0] = make AffiliatedOrg
 
- @course_offering.edit_offering :affiliated_org_list=> organization_list, :honors_flag => "YES"
+ @course_offering.edit_offering  :honors_flag => "YES", :affiliated_org_list=> organization_list
 
 end
