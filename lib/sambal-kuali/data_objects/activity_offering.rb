@@ -364,47 +364,47 @@
         set_options(DEFAULTS.merge(opts))
       end
 
-     # I assume this is the "create" method in the
-     # CRUD model. Should probably be renamed to "create"
-     # and the "opts" part removed (because all options
-     # for creation should be handled when the data
-     # object is initialized)
-      def create
-        # These lines are not necessary.
-        # You should be using the'
-        # update_options(opts) method at the bottom
-        # of this method--though see my comments
-        # above, as the opts should probably be
-        # removed entirely.
-        #@id = opts[:id]
-        #@affiliation = opts[:affiliation]
-        #@inst_effort = opts[:inst_effort]
+    # I assume this is the "create" method in the
+    # CRUD model. Should probably be renamed to "create"
+    # and the "opts" part removed (because all options
+    # for creation should be handled when the data
+    # object is initialized)
+    def create
+      # These lines are not necessary.
+      # You should be using the'
+      # update_options(opts) method at the bottom
+      # of this method--though see my comments
+      # above, as the opts should probably be
+      # removed entirely.
+      #@id = opts[:id]
+      #@affiliation = opts[:affiliation]
+      #@inst_effort = opts[:inst_effort]
 
-        # You probably want some navigation
-        # code here so that navigating is taken
-        # care of at this level instead of at
-        # The step definition level.
+      # You probably want some navigation
+      # code here so that navigating is taken
+      # care of at this level instead of at
+      # The step definition level.
 
-        on ActivityOfferingMaintenance do |page|
-          page.add_person_id.set @id
-          page.add_affiliation.select @affiliation
-          page.add_inst_effort.set @inst_effort
-          page.add_personnel
-        end
+      on ActivityOfferingMaintenance do |page|
+        page.add_person_id.set @id
+        page.add_affiliation.select @affiliation
+        page.add_inst_effort.set @inst_effort
+        page.add_personnel
       end
+    end
 
-      def edit opts={}
+    def edit opts={}
 
-        # TODO: Put navigation code here!
+      # TODO: Put navigation code here!
 
-        on ActivityOfferingMaintenance do |page|
-          page.add_person_id.fit opts[:id]
-          page.add_affiliation.fit opts[:affiliation]
-          page.add_inst_effort.fit opts[:inst_effort]
-          page.submit # TODO: check that this is the right action for edit
-        end
-        update_options(opts)
+      on ActivityOfferingMaintenance do |page|
+        page.add_person_id.fit opts[:id]
+        page.add_affiliation.fit opts[:affiliation]
+        page.add_inst_effort.fit opts[:inst_effort]
+        page.submit # TODO: check that this is the right action for edit
       end
+      update_options(opts)
+    end
 
   end
 
