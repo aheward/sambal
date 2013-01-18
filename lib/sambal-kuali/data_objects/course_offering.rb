@@ -24,49 +24,34 @@ class CourseOffering
                 :reg_options,
                 :search_by_subj
 
-
+  DEFAULTS = {
+      :term=>"20122",
+      :course=>"ENGL103",
+      :suffix=>"",
+      :activity_offering_cluster_list=>[],
+      :ao_list => [],
+      :final_exam_type => "NONE",
+      :wait_list => "NO",
+      :wait_list_level => "Course Offering",
+      :wait_list_type => "Automatic",
+      :grade_format => "",
+      :final_exam_driver => "",
+      :honors_flag => "NO",
+      :affiliated_person_list => {},
+      :affiliated_org_list => {},
+      :grade_options => "Letter",
+      :reg_options => "None available",
+      :search_by_subj => false
+  }
 
   def initialize(browser, opts={})
     @browser = browser
-
-    defaults = {
-        :term=>"20122",
-        :course=>"ENGL103",
-        :suffix=>"",
-        :activity_offering_cluster_list=>[],
-        :ao_list => [],
-        :final_exam_type => "NONE",
-        :wait_list => "NO",
-        :wait_list_level => "Course Offering",
-        :wait_list_type => "Automatic",
-        :grade_format => "",
-        :final_exam_driver => "",
-        :honors_flag => "NO",
-        :affiliated_person_list => {},
-        :affiliated_org_list => {},
-        :grade_options => "Letter",
-        :reg_options => "None available",
-        :search_by_subj => false
-    }
-    options = defaults.merge(opts)
-    set_options(options)
+    set_options(DEFAULTS.merge(opts))
   end
 
+  # Consider removing the "_offering" part of this method name
+  # as redundant.
   def edit_offering options={}
-    # defaults = {
-    #     :suffix=>@suffix,
-    #     :final_exam_type => @final_exam_type,
-    #     :wait_list => @wait_list,
-    #     :honors_flag => @honors_flag,
-    #     :affiliated_person_list => @affiliated_person_list,
-    #     :affiliated_org_list => @affiliated_org_list,
-    #     :wait_list_level => @wait_list_level,
-    #     :grade_format => @grade_format,
-    #     :final_exam_driver => @final_exam_driver,
-    #     :wait_list_type => @wait_list_type
-    # }
-
-    #options=defaults.merge(opts)
     if options[:suffix] != @suffix
      #TODO:Add Suffix to edit method Course Offerings
     end
@@ -176,6 +161,9 @@ class CourseOffering
       end
     end
 
+    # This is necessary to ensure the data object's
+    # instance variables are properly updated...
+    update_options(options)
 
   end
 
