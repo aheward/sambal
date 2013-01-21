@@ -34,12 +34,12 @@ class CourseOffering
         wait_list:                      "NO",
         wait_list_level:                "Course Offering",
         wait_list_type:                 "Automatic",
-        honors_flag:  "NO",
-        affiliated_person_list:  {},
-        affiliated_org_list:  {},
-        grade_options:  "Letter",
-        reg_options:  "None available",
-        search_by_subj:  false
+        honors_flag:                    "NO",
+        affiliated_person_list:         {},
+        affiliated_org_list:            {},
+        grade_options:                  "Letter",
+        reg_options:                    "None available",
+        search_by_subj:                 false
     }
     set_options(defaults.merge(opts))
   end
@@ -61,15 +61,15 @@ class CourseOffering
 
   def edit options={}
     if options[:suffix] != @suffix
-     #TODO: Add Suffix to edit method Course Offerings
+      #TODO: Add Suffix to edit method Course Offerings
     end
 
     if options[:wait_list] != nil
       on CourseOfferingEdit do |page|
         if options[:wait_list] == "NO"
-         page.waitlist_off
+          page.waitlist_off
         else
-         page.waitlist_on
+          page.waitlist_on
         end
         @wait_list = options[:wait_list]
       end
@@ -77,12 +77,12 @@ class CourseOffering
 
     if options[:wait_list_level] != nil
       on CourseOfferingEdit do |page|
-      if options[:wait_list_level] == "Activity Offering"
-       page.waitlist_option_activity_offering
-      else
-       page.waitlist_option_course_offering
-      end
-      @wait_list_level = options[:wait_list_level]
+        if options[:wait_list_level] == "Activity Offering"
+          page.waitlist_option_activity_offering
+        else
+          page.waitlist_option_course_offering
+        end
+        @wait_list_level = options[:wait_list_level]
       end
     end
 
@@ -95,11 +95,11 @@ class CourseOffering
 
     if options[:honors_flag] != nil
       on CourseOfferingEdit do |page|
-       if options[:honors_flag] == "YES"
-        page.honors_flag.set
-       else
-        page.honors_flag.clear
-      end
+        if options[:honors_flag] == "YES"
+          page.honors_flag.set
+        else
+          page.honors_flag.clear
+        end
         @honors_flag = options[:honors_flag]
       end
     end
@@ -121,9 +121,9 @@ class CourseOffering
     end
 
     if options[:grade_format] != nil
-     on CourseOfferingEdit do |page|
-       page.select_grade_roster_level(options[:grade_format])
-     end
+      on CourseOfferingEdit do |page|
+        page.select_grade_roster_level(options[:grade_format])
+      end
       @grade_format = options[:grade_format]
     end
 
@@ -295,7 +295,7 @@ class CourseOffering
     retVal = nil
     aoCode = ao_code[:ao_code]
     on ManageCourseOfferings do |page|
-       retVal = page.ao_schedule_data(aoCode)
+      retVal = page.ao_schedule_data(aoCode)
     end
 
     retVal
@@ -418,15 +418,15 @@ class AffiliatedOrg
                 :org_name
 
   def initialize(browser, opts={})
-      @browser = browser
+    @browser = browser
 
-       defaults = {
-                 :org_id => "65",
-                 :org_name => "Biology"
-                  }
-        options = defaults.merge(opts)
-        set_options(options)
-   end
+    defaults = {
+        :org_id => "65",
+        :org_name => "Biology"
+    }
+    options = defaults.merge(opts)
+    set_options(options)
+  end
 
 end
 
@@ -445,24 +445,27 @@ class DeliveryFormat
   def initialize(browser, opts={})
     @browser = browser
     defaults = {
-        format:            "Lecture/Quiz",
-        grade_format:      "Course",
-        final_exam_driver: "Lecture"
+        format:            :random,
+        grade_format:      :random,
+        final_exam_driver: :random
     }
     set_options(defaults.merge(opts))
     requires @course_offering
   end
 
   def create
-    #TODO
+    navigate
+
   end
 
   def edit opts={}
+    navigate
     #TODO
     update_options(opts)
   end
 
   def delete
+    navigate
     #TODO
   end
 
@@ -472,6 +475,17 @@ class DeliveryFormat
       @format = selected_options[:del_format]
       @grade_format = selected_options[:grade_format]
       @final_exam_driver = selected_options[:final_exam_driver]
+    end
+
+  end
+
+  private
+
+  def navigate
+    begin
+      bool = on(CourseOfferingEdit).course_code=~/^#{@course_offering[0..6]}/
+    rescue
+      bool = false
     end
 
   end
