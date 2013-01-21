@@ -4,118 +4,68 @@ module Workflows
 
   # Site Navigation helpers...
   def go_to_rollover_details
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.view_rollover_details
-    end
+    enrollment
+    on(Enrollment).view_rollover_details
   end
 
-
   def go_to_perform_rollover
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.perform_rollover
-    end
+    enrollment
+    on(Enrollment).perform_rollover
   end
 
   def go_to_create_population
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.manage_populations
-    end
-    on ManagePopulations do |page|
-      page.create_new
-    end
+    enrollment
+    on(Enrollment).manage_populations
+    on(ManagePopulations).create_new
   end
 
   def go_to_manage_population
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.manage_populations
-    end
+    enrollment
+    on(Enrollment).manage_populations
   end
 
   def go_to_manage_reg_windows
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.manage_registration_windows
-    end
+    enrollment
+    on(Enrollment).manage_registration_windows
   end
 
   def go_to_manage_course_offerings
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.manage_course_offerings
-    end
+    enrollment
+    on(Enrollment).manage_course_offerings
   end
 
   def go_to_display_schedule_of_classes
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.schedule_of_classes
-    end
-
+    enrollment
+    on(Enrollment).schedule_of_classes
   end
 
   def go_to_holiday_calendar
-    visit MainMenu do |page|
-      page.enrollment
-    end
-    on Enrollment do |page|
-      page.create_holiday_calendar
-    end
+    enrollment
+    on(Enrollment).create_holiday_calendar
   end
 
-
   def go_to_academic_calendar
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.create_academic_calendar
-    end
+    enrollment
+    on(Enrollment).create_academic_calendar
   end
 
   def go_to_calendar_search
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.search_for_calendar_or_term
-    end
+    enrollment
+    on(Enrollment).search_for_calendar_or_term
   end
 
   def go_to_create_course_offerings
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.create_course_offerings
-    end
+    enrollment
+    on(Enrollment).create_course_offerings
   end
-  # Helper methods...
 
   def go_to_manage_soc
-    visit MainMenu do |page|
-      page.enrollment_home
-    end
-    on Enrollment do |page|
-      page.manage_soc
-    end
+    enrollment
+    on(Enrollment).manage_soc
+  end
+
+  def enrollment
+    visit(MainMenu).enrollment_home
   end
 
   def logged_in_user
@@ -131,9 +81,7 @@ module Workflows
   end
 
   def log_in(user, pwd)
-    on Login do |page|
-      page.login_with user, pwd
-    end
+    on(Login).login_with user, pwd
   end
 
 end

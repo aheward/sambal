@@ -15,9 +15,6 @@ class CourseOffering
                 :wait_list,
                 :wait_list_level,
                 :wait_list_type,
-                :grade_format,
-                :delivery_format_list,
-                :final_exam_driver,
                 :honors_flag,
                 :affiliated_person_list,
                 :affiliated_org_list,
@@ -25,50 +22,46 @@ class CourseOffering
                 :reg_options,
                 :search_by_subj
 
-
-
   def initialize(browser, opts={})
     @browser = browser
-
     defaults = {
-        :term=>"201201",
-        :course=>"ENGL211",
-        :suffix=>"",
-        :activity_offering_cluster_list=>[],
-        :ao_list => [],
-        :final_exam_type => "NONE",
-        :wait_list => "NO",
-        :wait_list_level => "Course Offering",
-        :wait_list_type => "Automatic",
-        :grade_format => "",
-        :delivery_format_list => [],
-        :final_exam_driver => "",
-        :honors_flag => "NO",
-        :affiliated_person_list => {},
-        :affiliated_org_list => {},
-        :grade_options => "Letter",
-        :reg_options => "None available",
-        :search_by_subj => false
+        term:                           "201201",
+        course:                         "ENGL211",
+        suffix:                         random_alphanums,
+        activity_offering_cluster_list: [],
+        ao_list:                        [],
+        final_exam_type:                "NONE",
+        wait_list:                      "NO",
+        wait_list_level:                "Course Offering",
+        wait_list_type:                 "Automatic",
+        honors_flag:  "NO",
+        affiliated_person_list:  {},
+        affiliated_org_list:  {},
+        grade_options:  "Letter",
+        reg_options:  "None available",
+        search_by_subj:  false
     }
-    options = defaults.merge(opts)
-    set_options(options)
+    set_options(defaults.merge(opts))
   end
 
-  def create_offering
+  # Removed "_offering" because it's going to be
+  # obvious what's being created.
+  def create
+    go_to_create_course_offerings # TODO: Should this navigation be "manage" instead?
     on CreateCourseOffering do  |page|
-      @suffix = random_alphanums.strip
+      # Removed the setting of @suffix here. Put it in DEFAULTS
       page.suffix.set @suffix
       @course = "#{@course}#{@suffix}"
-      delivery_obj = make DeliveryFormat
-      delivery_obj.select_random_delivery_formats
-      @delivery_format_list << delivery_obj
+      delivery_obj = make DeliveryFormat, course_offering: @course # TODO: Add randomizing key/value pairs, here
+      delivery_obj.create
+      @delivery_formats << delivery_obj
       page.create_offering
     end
   end
 
-  def edit_offering options={}
+  def edit options={}
     if options[:suffix] != @suffix
-     #TODO:Add Suffix to edit method Course Offerings
+     #TODO: Add Suffix to edit method Course Offerings
     end
 
     if options[:wait_list] != nil
@@ -446,27 +439,39 @@ class DeliveryFormat
 
   attr_accessor :format,
                 :grade_format,
-                :final_exam_driver
+                :final_exam_driver,
+                :course_offering
 
   def initialize(browser, opts={})
     @browser = browser
-
     defaults = {
-      :format => "Lecture/Quiz",
-      :grade_format => "Course",
-      :final_exam_driver => "Lecture"
+        format:            "Lecture/Quiz",
+        grade_format:      "Course",
+        final_exam_driver: "Lecture"
     }
-    options = defaults.merge(opts)
-    set_options(options)
+    set_options(defaults.merge(opts))
+    requires @course_offering
   end
 
-  def select_random_delivery_formats
+  def create
+    #TODO
+  end
+
+  def edit opts={}
+    #TODO
+    update_options(opts)
+  end
+
+  def delete
+    #TODO
+  end
+
+  def select_random_delivery_formats # TODO: Rethink and rework - better way to randomize these
     on CreateCourseOffering do  |page|
       selected_options = page.add_random_delivery_format
       @format = selected_options[:del_format]
       @grade_format = selected_options[:grade_format]
       @final_exam_driver = selected_options[:final_exam_driver]
-      return selected_options
     end
 
   end
