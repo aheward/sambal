@@ -440,7 +440,8 @@ class DeliveryFormat
   attr_accessor :format,
                 :grade_format,
                 :final_exam_driver,
-                :course_offering
+                :course_offering,
+                :term
 
   def initialize(browser, opts={})
     @browser = browser
@@ -450,7 +451,7 @@ class DeliveryFormat
         final_exam_driver: :random
     }
     set_options(defaults.merge(opts))
-    requires @course_offering
+    requires @course_offering, @term
   end
 
   def create
@@ -479,14 +480,10 @@ class DeliveryFormat
 
   end
 
-  private
+  #private
 
   def navigate
-    begin
-      bool = on(CourseOfferingEdit).course_code=~/^#{@course_offering[0..6]}/
-    rescue
-      bool = false
-    end
+    puts @browser.url=~/CourseOfferingEdit/
 
   end
 

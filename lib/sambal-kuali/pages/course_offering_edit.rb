@@ -4,14 +4,14 @@ class CourseOfferingEdit < BasePage
   validation_elements
   frame_element
 
-  #expected_element :course_code_element
+  expected_element :course_code_element
 
   action(:submit) { |b| b.frm.button(text: "submit").click; b.loading.wait_while_present }
   action(:cancel) { |b| b.frm.link(text: "cancel").click; b.loading.wait_while_present }
 
-  element(:course_code_element) { |b| b.frm.div(data_label: "Course Offering Code").span(index: 2) }
-  value(:course_code) { |b| b.frm.course_code_element.text() }
-  element(:change_suffix) { |b| b.frm.div(data_label: "Change Suffix").text_field() }
+  element(:course_code_element) { |b| b.frm.div(data_label: "Course Code(Subject/Number)").span }
+  value(:course_code) { |b| b.frm.course_code_element.text }
+  element(:suffix) { |b| b.frm.div(data_label: "Course Number Suffix").text_field }
 
   element(:grading_option_letter) { |b| b.frm.radio(value: "kuali.resultComponent.grade.letter") }
   element(:credit_type_option_fixed) { |b| b.frm.radio(value: "kuali.result.values.group.type.fixed") }
@@ -114,9 +114,9 @@ class CourseOfferingEdit < BasePage
     #workaround here as id field value is not returned in rows[1].text
     #admin_orgs_table.row(text: /#{Regexp.escape(org_id)}/)
     admin_orgs_table.rows[1..-1].each do |row|
-       if row.cells[ORG_ID_COLUMN].text_field().value == org_id
-         return row
-       end
+      if row.cells[ORG_ID_COLUMN].text_field().value == org_id
+        return row
+      end
     end
   end
 
