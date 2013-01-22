@@ -1,13 +1,13 @@
 class CreateCourseOffering < BasePage
 
-  expected_title /Kuali :: Create Course Offering/
+  expected_title "Kuali :: Create Course Offering"
 
   wrapper_elements
   frame_element
 
   expected_element :target_term
 
-  element(:target_term) { |b| b.frm.div(data_label: "Target Term").text_field() }
+  element(:target_term) { |b| b.frm.text_field(name: "document.newMaintainableObject.dataObject.targetTermCode") }
   element(:catalogue_course_code) { |b| b.frm.div(data_label: "Catalog Course Code").text_field() }
 
   action(:show) { |b| b.frm.button(text: "Show").click; b.loading.wait_while_present } # Persistent ID needed!

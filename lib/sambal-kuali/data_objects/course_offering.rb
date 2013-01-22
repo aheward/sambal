@@ -26,7 +26,7 @@ class CourseOffering
     @browser = browser
     defaults = {
         term:                           "201201",
-        course:                         "ENGL211",
+        course:                         "ENGL212",
         suffix:                         random_alphanums,
         activity_offering_cluster_list: [],
         ao_list:                        [],
@@ -44,18 +44,32 @@ class CourseOffering
     set_options(defaults.merge(opts))
   end
 
-  # Removed "_offering" because it's going to be
-  # obvious what's being created.
   def create
-    go_to_create_course_offerings # TODO: Should this navigation be "manage" instead?
-    on CreateCourseOffering do  |page|
-      # Removed the setting of @suffix here. Put it in DEFAULTS
+    go_to_create_course_offerings
+    on CreateCourseOffering do |page|
+      page.target_term.set @term
+      page.catalogue_course_code.set @course
+      page.show
+
+      begin
+        page.create_co_button.wait_until_present(5)
+        page.target_row(@course).link(text: "Manage").click
+        page.loading.wait_while_present
+      rescue Watir::Wait::TimeoutError
+        #means was single CO returned, AO list is already displayed
+      end
+    end
+
+
+    sleep 30
+
+    on CreateCourseOffering do |page|
       page.suffix.set @suffix
       @course = "#{@course}#{@suffix}"
-      delivery_obj = make DeliveryFormat, course_offering: @course # TODO: Add randomizing key/value pairs, here
-      delivery_obj.create
+      delivery_obj = create DeliveryFormat, course_offering: @course, term: @term
       @delivery_formats << delivery_obj
-      page.create_offering
+
+      #page.create_offering
     end
   end
 
@@ -404,6 +418,7 @@ class CourseOffering
       end
     end
   end
+
 end
 
 class AffiliatedOrg
@@ -456,7 +471,7 @@ class DeliveryFormat
 
   def create
     navigate
-
+    puts "Make the create steps now..."
   end
 
   def edit opts={}
@@ -480,11 +495,27 @@ class DeliveryFormat
 
   end
 
-  #private
+  private
 
   def navigate
-    puts @browser.url=~/CourseOfferingEdit/
+    unless @browser.title =~ /Edit #{@course_offering[0..6]}/
+      go_to_manage_course_offerings
 
+      on ManageCourseOfferings do |page|
+        page.term.set @term
+        page.input_code.set @course_offering[0..6]
+
+        page.show
+
+        begin
+          page.create_co_button.wait_until_present(5)
+          page.edit @course_offering
+          page.loading.wait_while_present
+        rescue Watir::Wait::TimeoutError
+          page.edit_offering
+        end
+      end
+    end
   end
 
 end

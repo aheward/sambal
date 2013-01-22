@@ -55,8 +55,10 @@ module Workflows
   end
 
   def go_to_create_course_offerings
-    enrollment
-    on(Enrollment).create_course_offerings
+    unless @browser.title=="Kuali :: Create Course Offering"
+      enrollment
+      on(Enrollment).create_course_offerings
+    end
   end
 
   def go_to_manage_soc
